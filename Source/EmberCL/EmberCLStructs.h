@@ -14,7 +14,7 @@
 namespace EmberCLns
 {
 //These two must always match.
-#ifdef WIN32
+#ifdef _MSC_VER
 	#define ALIGN __declspec(align(16))
 #else
 	#define ALIGN __attribute__ ((aligned (16)))

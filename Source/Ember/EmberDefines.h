@@ -1,12 +1,11 @@
 #pragma once
 
 #include "EmberPch.h"
-
 /// <summary>
 /// Basic #defines used throughout the library.
 /// </summary>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 	#if defined(BUILDING_EMBER)
 		#define EMBER_API __declspec(dllexport)
 	#else
@@ -15,8 +14,12 @@
 #else
 	#define EMBER_API
 	#define fopen_s(pFile,filename,mode) ((*(pFile)=fopen((filename),(mode)))==nullptr)
+#ifndef _stat
 	#define _stat stat
+#endif
+#ifndef _fstat
 	#define _fstat fstat
+#endif
 	#define _stricmp strcmp
 	#define sscanf_s sscanf
 	#define sprintf_s snprintf

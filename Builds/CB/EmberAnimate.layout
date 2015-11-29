@@ -1,14 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Release x64" />
-	<File name="../../Source/EmberAnimate/EmberAnimate.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\..\Source\EmberCommon\EmberCommon.h" open="0" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="5739" topLine="184" />
+			<Cursor1 position="0" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="../../Source/EmberCommon/EmberCommon.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\..\Source\EmberCommon\EmberCommonPch.h" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="4835" topLine="143" />
+			<Cursor1 position="377" topLine="12" />
+		</Cursor>
+	</File>
+	<File name="..\..\Source\EmberCommon\EmberOptions.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2406" topLine="109" />
+		</Cursor>
+	</File>
+	<File name="..\..\Source\EmberCommon\JpegUtils.h" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="10894" topLine="322" />
+		</Cursor>
+	</File>
+	<File name="..\..\Source\EmberCommon\SimpleOpt.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="12140" topLine="346" />
+		</Cursor>
+	</File>
+	<File name="..\..\Source\EmberAnimate\EmberAnimate.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="12820" topLine="283" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

@@ -80,8 +80,8 @@ public:
 	Palette<T>* GetRandomPalette()
 	{
 		auto p = m_Palettes.begin();
-		int i = 0, paletteFileIndex = QTIsaac<ISAAC_SIZE, ISAAC_INT>::GlobalRand->Rand() % Size();
-		
+		size_t i = 0, paletteFileIndex = QTIsaac<ISAAC_SIZE, ISAAC_INT>::GlobalRand->Rand() % Size();
+
 		//Move p forward i elements.
 		while (i < paletteFileIndex && p != m_Palettes.end())
 		{
@@ -91,7 +91,7 @@ public:
 
 		if (i < Size())
 		{
-			int paletteIndex = QTIsaac<ISAAC_SIZE, ISAAC_INT>::GlobalRand->Rand() % p->second.size();
+			size_t paletteIndex = QTIsaac<ISAAC_SIZE, ISAAC_INT>::GlobalRand->Rand() % p->second.size();
 
 			if (paletteIndex < p->second.size())
 				return &p->second[paletteIndex];

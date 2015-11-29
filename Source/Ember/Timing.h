@@ -22,9 +22,8 @@ public:
 	/// As a convenience, the Tic() function is called automatically.
 	/// </summary>
 	/// <param name="precision">The precision of the seconds field of the elapsed time. Default: 2.</param>
-	Timing(int precision = 2)
+	Timing(int precision = 2):m_Precision(precision)
 	{
-		m_Precision = precision;
 		Init();
 		Tic();
 	}
@@ -193,7 +192,7 @@ private:
 	CriticalSection()
 	{
 		pthread_mutexattr_t attr;
-		
+
 		pthread_mutexattr_init(&attr);
 		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
 		pthread_mutex_init(&m_CriticalSection, &attr);

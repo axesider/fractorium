@@ -29,9 +29,10 @@ public:
 	/// <param name="category">The locale category. Default: LC_NUMERIC.</param>
 	/// <param name="loc">The locale. Default: "C".</param>
 	Locale(int category = LC_NUMERIC, const char* loc = "C")
+        :m_Category(category)
+        ,m_NewLocale(string(loc))
 	{
-		m_Category = category;
-		m_NewLocale = string(loc);
+
 		m_OriginalLocale = setlocale(category, nullptr);//Query.
 
 		if (m_OriginalLocale.empty())
@@ -454,7 +455,7 @@ public:
 	{
 		char ch[16];
 
-#ifdef WIN32
+#ifdef _MSC_VER
 		_itoa_s(i, ch, 16, radix);
 #else
 		sprintf(ch, "%d", i);
@@ -473,7 +474,7 @@ public:
 	{
 		char ch[64];
 
-#ifdef WIN32
+#ifdef _MSC_VER
 		_ui64toa_s(i, ch, 64, radix);
 #else
 		sprintf(ch, "%lu", i);
@@ -558,7 +559,7 @@ private:
 		char* attStr;
 		const char* loc = __FUNCTION__;
 		int soloXform = -1;
-		uint i, j, count, index = 0;
+		uint count, index = 0;
 		double vals[16];
 		xmlAttrPtr att, curAtt;
 		xmlNodePtr editNode, childNode, motionNode;
@@ -654,7 +655,7 @@ private:
 			}
 			else if (!Compare(curAtt->name, "size"))
 			{
-				if (sscanf_s(attStr, "%lu %lu", &currentEmber.m_FinalRasW, &currentEmber.m_FinalRasH) != 2)
+				if (sscanf_s(attStr, "%llu %llu", &currentEmber.m_FinalRasW, &currentEmber.m_FinalRasH) != 2)
 				{
 					m_ErrorReport.push_back(string(loc) + " : Invalid size attribute " + string(attStr));
 					xmlFree(attStr);
@@ -721,9 +722,9 @@ private:
 			{
 				stringstream ss(attStr);
 
-				for (i = 0; i < 4; i++)
+				for (int i = 0; i < 4; i++)
 				{
-					for (j = 0; j < 4; j++)
+					for (int j = 0; j < 4; j++)
 					{
 						ss >> currentEmber.m_Curves.m_Points[i][j].x;
 						ss >> currentEmber.m_Curves.m_Points[i][j].y;
@@ -847,11 +848,6 @@ private:
 				//Make sure BOTH are not specified, otherwise either are ok.
 				int numColors = 0;
 				int numBytes = 0;
-				int index0, index1;
-				T hue0, hue1;
-				T blend = 0.5;
-				index0 = index1 = -1;
-				hue0 = hue1 = 0.0;
 
 				//Loop through the attributes of the palette element.
 				att = childNode->properties;
@@ -1121,7 +1117,7 @@ private:
 		//if (!newLinear)
 		//	currentEmber.Flatten(m_FlattenNames);
 
-		for (i = 0; i < currentEmber.XformCount(); i++)
+		for (int i = 0; i < (int)currentEmber.XformCount(); i++)
 			if (soloXform >= 0 && i != soloXform)
 				currentEmber.GetXform(i)->m_Opacity = 0;//Will calc the cached adjusted viz value later.
 
@@ -1489,7 +1485,6 @@ private:
 		int colorCount = 0;
 		uint r, g, b, a;
 		int ret;
-		char tmps[2];
 		int skip = static_cast<int>(abs(chan));
 		bool ok = true;
 		const char* loc = __FUNCTION__;
@@ -1530,10 +1525,11 @@ private:
 
 			colorCount++;
 
-		} while (colorCount < numColors && colorCount < ember.m_Palette.m_Entries.size());
+		} while (colorCount < numColors && colorCount < (int)ember.m_Palette.m_Entries.size());
 
-#ifdef WIN32
-		if (sscanf_s(&(colstr[colorIndex]),"%1s", tmps, sizeof(tmps)) > 0)//Really need to migrate all of this parsing to C++.//TODO
+		char tmps[2];
+#ifdef _MSC_VER
+		if (sscanf_s(&(colstr[colorIndex]),"%1s", tmps, 2) > 0)//Really need to migrate all of this parsing to C++.//TODO
 #else
 		if (sscanf_s(&(colstr[colorIndex]),"%1s", tmps) > 0)
 #endif

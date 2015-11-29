@@ -1,3 +1,4 @@
+#ifdef USECL
 #include "EmberCLPch.h"
 #include "OpenCLWrapper.h"
 
@@ -1339,3 +1340,4 @@ std::string OpenCLWrapper::ErrorToStringCL(cl_int err)
 	}
 }
 }
+#endif

@@ -42,7 +42,9 @@ void SetDefaultTestValues(Ember<T>& ember)
 template <typename T, typename bucketT>
 bool EmberGenome(EmberOptions& opt)
 {
+#ifdef USECL
 	OpenCLWrapper wrapper;
+#endif
 	std::cout.imbue(std::locale(""));
 
 	if (opt.DumpArgs())
@@ -50,8 +52,10 @@ bool EmberGenome(EmberOptions& opt)
 
 	if (opt.OpenCLInfo())
 	{
+#ifdef USECL
 		cerr << "\nOpenCL Info: " << endl;
 		cerr << wrapper.DumpInfo();
+#endif
 		return true;
 	}
 
@@ -96,12 +100,8 @@ bool EmberGenome(EmberOptions& opt)
 	if (!InitPaletteList<T>(opt.PalettePath()))
 		return false;
 
-	if (!opt.EmberCL())
-	{
-		if (opt.ThreadCount() != 0)
-			renderer->ThreadCount(opt.ThreadCount(), opt.IsaacSeed() != "" ? opt.IsaacSeed().c_str() : nullptr);
-	}
-	else
+#ifdef USECL
+	if (opt.EmberCL())
 	{
 		cerr << "Using OpenCL to render." << endl;
 
@@ -110,6 +110,12 @@ bool EmberGenome(EmberOptions& opt)
 			cerr << "Platform: " << wrapper.PlatformName(opt.Platform()) << endl;
 			cerr << "Device: " << wrapper.DeviceName(opt.Platform(), opt.Device()) << endl;
 		}
+	}
+	else
+#endif
+	{
+		if (opt.ThreadCount() != 0)
+			renderer->ThreadCount(opt.ThreadCount(), opt.IsaacSeed() != "" ? opt.IsaacSeed().c_str() : nullptr);
 	}
 
 	//SheepTools will own the created renderer and will take care of cleaning it up.
@@ -775,7 +781,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//Required for large allocs, else GPU memory usage will be severely limited to small sizes.
 	//This must be done in the application and not in the EmberCL DLL.
-#ifdef WIN32
+#ifdef _MSC_VER
 	_putenv_s("GPU_MAX_ALLOC_PERCENT", "100");
 #else
 	putenv(const_cast<char*>("GPU_MAX_ALLOC_PERCENT=100"));

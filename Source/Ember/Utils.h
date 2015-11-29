@@ -187,7 +187,11 @@ static bool ReadFile(const char* filename, string& buf, bool nullTerminate = tru
 			struct _stat statBuf;
 
 #if defined(_WIN32) || defined(__APPLE__)
+			#if _MSC_VER>=1900		
+			int statResult = _fstat(_fileno(f), &statBuf);
+			#else
 			int statResult = _fstat(f->_file, &statBuf);//Get data associated with file.
+			#endif
 #else
 			int statResult = _fstat(f->_fileno, &statBuf);//Get data associated with file.
 #endif
@@ -536,7 +540,7 @@ static inline T SafeTan(T x)
 }
 
 template <>
-#ifdef _WIN32
+#ifdef _MSC_VER
 static
 #endif
 float SafeTan<float>(float x)
@@ -545,7 +549,7 @@ float SafeTan<float>(float x)
 }
 
 template <>
-#ifdef _WIN32
+#ifdef _MSC_VER
 static
 #endif
 double SafeTan<double>(double x)
@@ -874,14 +878,14 @@ static inline T Arg(char* name, T def)
 /// <param name="def">The default value to return if the environment variable was not present</param>
 /// <returns>The value of the specified environment variable if found, else default</returns>
 template <>
-#ifdef _WIN32
+#ifdef _MSC_VER
 static
 #endif
 int Arg<int>(char* name, int def)
 {
 	char* ch;
 	int returnVal;
-#ifdef WIN32
+#ifdef _MSC_VER
 	size_t len;
 	errno_t err = _dupenv_s(&ch, &len, name);
 #else
@@ -907,7 +911,7 @@ int Arg<int>(char* name, int def)
 /// <param name="def">The default value to return if the environment variable was not present</param>
 /// <returns>The value of the specified environment variable if found, else default</returns>
 template <>
-#ifdef _WIN32
+#ifdef _MSC_VER
 static
 #endif
 uint Arg<uint>(char* name, uint def)
@@ -922,7 +926,7 @@ uint Arg<uint>(char* name, uint def)
 /// <param name="def">The default value to return if the environment variable was not present</param>
 /// <returns>The value of the specified environment variable if found, else default</returns>
 template <>
-#ifdef _WIN32
+#ifdef _MSC_VER
 static
 #endif
 bool Arg<bool>(char* name, bool def)
@@ -937,14 +941,14 @@ bool Arg<bool>(char* name, bool def)
 /// <param name="def">The default value to return if the environment variable was not present</param>
 /// <returns>The value of the specified environment variable if found, else default</returns>
 template <>
-#ifdef _WIN32
+#ifdef _MSC_VER
 static
 #endif
 double Arg<double>(char* name, double def)
 {
 	char* ch;
 	double returnVal;
-#ifdef WIN32
+#ifdef _MSC_VER
 	size_t len;
 	errno_t err = _dupenv_s(&ch, &len, name);
 #else
@@ -957,7 +961,7 @@ double Arg<double>(char* name, double def)
 	else
 		returnVal = atof(ch);
 
-#ifdef WIN32
+#ifdef _MSC_VER
 	free(ch);
 #endif
 	return returnVal;
@@ -970,14 +974,14 @@ double Arg<double>(char* name, double def)
 /// <param name="def">The default value to return if the environment variable was not present</param>
 /// <returns>The value of the specified environment variable if found, else default</returns>
 template <>
-#ifdef _WIN32
+#ifdef _MSC_VER
 static
 #endif
 string Arg<string>(char* name, string def)
 {
 	char* ch;
 	string returnVal;
-#ifdef WIN32
+#ifdef _MSC_VER
 	size_t len;
 	errno_t err = _dupenv_s(&ch, &len, name);
 #else

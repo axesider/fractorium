@@ -11,8 +11,9 @@
 template <typename T, typename bucketT>
 bool EmberRender(EmberOptions& opt)
 {
+#ifdef USECL
 	OpenCLWrapper wrapper;
-
+#endif
 	std::cout.imbue(std::locale(""));
 
 	if (opt.DumpArgs())

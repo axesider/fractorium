@@ -606,11 +606,11 @@ public:
 			size == cxTrn.size())
 		{
 			T c1[2], d, t, refang;
-			glm::length_t col, k;
+			glm::length_t col;
 			int zlm[2];
 			const char* loc = __FUNCTION__;
 
-			for (k = 0; k < size; k++)
+			for (size_t k = 0; k < size; k++)
 			{
 				//Establish the angles and magnitudes for each component.
 				//Keep translation linear.
@@ -657,7 +657,7 @@ public:
 			//by adjusting each angle in succession, and rotate clockwise if 180 degrees.
 			for (col = 0; col < 2; col++)
 			{
-				for (k = 1; k < size; k++)
+				for (size_t k = 1; k < size; k++)
 				{
 					if (Xform<T>* xform = embers[k].GetTotalXform(xfi))
 					{
@@ -769,21 +769,21 @@ public:
 	static void InterpAndConvertBack(vector<T>& coefs, vector<v2T>& cxAng, vector<v2T>& cxMag, vector<v2T>& cxTrn, Affine2D<T>& store)
 	{
 		size_t size = coefs.size();
-		glm::length_t i, col, accmode[2] = { 0, 0 };
+		glm::length_t col, accmode[2] = { 0, 0 };
 		T expmag, accang[2] = { 0, 0 }, accmag[2] = { 0, 0 };
 
 		//Accumulation mode defaults to logarithmic, but in special
 		//cases switch to linear accumulation.
 		for (col = 0; col < 2; col++)
 		{
-			for (i = 0; i < size; i++)
+			for (size_t i = 0; i < size; i++)
 			{
 				if (log(cxMag[i][col]) < -10)
 					accmode[col] = 1;//Mode set to linear interp.
 			}
 		}
 
-		for (i = 0; i < size; i++)
+		for (size_t i = 0; i < size; i++)
 		{
 			for (col = 0; col < 2; col++)
 			{

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EmberCommonPch.h"
-
+#include "../../zlib/zlib.h"
 #define PNG_COMMENT_MAX 8
 
 /// <summary>
@@ -17,11 +17,10 @@ static bool WritePpm(const char* filename, byte* image, size_t width, size_t hei
 	bool b = false;
 	size_t size = width * height * 3;
 	FILE* file;
-
 	if (fopen_s(&file, filename, "wb") == 0)
 	{
-		fprintf_s(file, "P6\n");
-		fprintf_s(file, "%lu %lu\n255\n", width, height);
+		fprintf(file, "P6\n");
+		fprintf(file, "%llu %llu\n255\n", width, height);
 
 		b = (size == fwrite(image, 1, size, file));
 		fclose(file);
@@ -30,6 +29,7 @@ static bool WritePpm(const char* filename, byte* image, size_t width, size_t hei
 	return b;
 }
 
+#ifdef USE_JPG
 /// <summary>
 /// Write a JPEG file.
 /// </summary>
@@ -120,7 +120,7 @@ static bool WriteJpeg(const char* filename, byte* image, size_t width, size_t he
 
 	return b;
 }
-
+#endif // USE_JPG
 /// <summary>
 /// Write a PNG file.
 /// </summary>
@@ -144,42 +144,9 @@ static bool WritePng(const char* filename, byte* image, size_t width, size_t hei
 	{
 		png_structp  png_ptr;
 		png_infop    info_ptr;
-		png_text     text[PNG_COMMENT_MAX];
 		size_t i;
 		glm::uint16 testbe = 1;
 		vector<byte*> rows(height);
-
-		text[0].compression = PNG_TEXT_COMPRESSION_NONE;
-		text[0].key = const_cast<png_charp>("flam3_version");
-		text[0].text = const_cast<png_charp>(EmberVersion());
-
-		text[1].compression = PNG_TEXT_COMPRESSION_NONE;
-		text[1].key = const_cast<png_charp>("flam3_nickname");
-		text[1].text = const_cast<png_charp>(nick.c_str());
-
-		text[2].compression = PNG_TEXT_COMPRESSION_NONE;
-		text[2].key = const_cast<png_charp>("flam3_url");
-		text[2].text = const_cast<png_charp>(url.c_str());
-
-		text[3].compression = PNG_TEXT_COMPRESSION_NONE;
-		text[3].key = const_cast<png_charp>("flam3_id");
-		text[3].text = const_cast<png_charp>(id.c_str());
-
-		text[4].compression = PNG_TEXT_COMPRESSION_NONE;
-		text[4].key = const_cast<png_charp>("flam3_error_rate");
-		text[4].text = const_cast<png_charp>(comments.m_Badvals.c_str());
-
-		text[5].compression = PNG_TEXT_COMPRESSION_NONE;
-		text[5].key = const_cast<png_charp>("flam3_samples");
-		text[5].text = const_cast<png_charp>(comments.m_NumIters.c_str());
-
-		text[6].compression = PNG_TEXT_COMPRESSION_NONE;
-		text[6].key = const_cast<png_charp>("flam3_time");
-		text[6].text = const_cast<png_charp>(comments.m_Runtime.c_str());
-
-		text[7].compression = PNG_TEXT_COMPRESSION_zTXt;
-		text[7].key = const_cast<png_charp>("flam3_genome");
-		text[7].text = const_cast<png_charp>(comments.m_Genome.c_str());
 
 		for (i = 0; i < height; i++)
 			rows[i] = image + i * width * 4 * bytesPerChannel;
@@ -196,15 +163,62 @@ static bool WritePng(const char* filename, byte* image, size_t width, size_t hei
 		}
 
 		png_init_io(png_ptr, file);
-
+        png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
 		png_set_IHDR(png_ptr, info_ptr, png_uint_32(width), png_uint_32(height), 8 * png_uint_32(bytesPerChannel),
-			PNG_COLOR_TYPE_RGBA,
+			PNG_COLOR_TYPE_RGB,
 			PNG_INTERLACE_NONE,
-			PNG_COMPRESSION_TYPE_BASE,
-			PNG_FILTER_TYPE_BASE);
+			PNG_COMPRESSION_TYPE_DEFAULT,
+			PNG_FILTER_TYPE_DEFAULT);
 
 		if (enableComments == 1)
+        {
+        /*"Title"
+        "Author"           Name of image's creator
+        "Description"      Description of image (possibly long)
+        "Copyright"        Copyright notice
+        "Creation Time"    Time of original image creation
+                         (usually RFC 1123 format, see below)
+        "Software"         Software used to create the image
+        "Disclaimer"       Legal disclaimer
+        "Warning"          Warning of nature of content
+        "Source"           Device used to create the image
+        "Comment"
+        */
+            png_text     text[PNG_COMMENT_MAX];
+            text[0].compression = PNG_TEXT_COMPRESSION_NONE;
+            text[0].key = const_cast<png_charp>("Software");
+            text[0].text = const_cast<png_charp>(EmberVersion());
+
+            text[1].compression = PNG_TEXT_COMPRESSION_NONE;
+            text[1].key = const_cast<png_charp>("Author");
+            text[1].text = const_cast<png_charp>(nick.c_str());
+
+            text[2].compression = PNG_TEXT_COMPRESSION_NONE;
+            text[2].key = const_cast<png_charp>("flam3_url");
+            text[2].text = const_cast<png_charp>(url.c_str());
+
+            text[3].compression = PNG_TEXT_COMPRESSION_NONE;
+            text[3].key = const_cast<png_charp>("flam3_id");
+            text[3].text = const_cast<png_charp>(id.c_str());
+
+            text[4].compression = PNG_TEXT_COMPRESSION_NONE;
+            text[4].key = const_cast<png_charp>("flam3_error_rate");
+            text[4].text = const_cast<png_charp>(comments.m_Badvals.c_str());
+
+            text[5].compression = PNG_TEXT_COMPRESSION_NONE;
+            text[5].key = const_cast<png_charp>("flam3_samples");
+            text[5].text = const_cast<png_charp>(comments.m_NumIters.c_str());
+
+            text[6].compression = PNG_TEXT_COMPRESSION_NONE;
+            text[6].key = const_cast<png_charp>("Creation Time");
+            text[6].text = const_cast<png_charp>(comments.m_Runtime.c_str());
+
+            text[7].compression = PNG_TEXT_COMPRESSION_zTXt;
+            text[7].key = const_cast<png_charp>("flam3_genome");
+            text[7].text = const_cast<png_charp>(comments.m_Genome.c_str());
+
 			png_set_text(png_ptr, info_ptr, text, PNG_COMMENT_MAX);
+        }
 
 		png_write_info(png_ptr, info_ptr);
 
@@ -314,25 +328,25 @@ static bool SaveBmp(const char* filename, byte* image, size_t width, size_t heig
 	info.biClrUsed = 0;
 	info.biClrImportant = 0;
 
-	if ((file = CreateFileA(filename, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) == NULL)
+	if ((file = CreateFileA(filename, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr)) == nullptr)
 	{
 		CloseHandle(file);
 		return false;
 	}
 
-	if (WriteFile(file, &bmfh, sizeof (BITMAPFILEHEADER), &bwritten, NULL) == false)
+	if (WriteFile(file, &bmfh, sizeof (BITMAPFILEHEADER), &bwritten, nullptr) == false)
 	{
 		CloseHandle(file);
 		return false;
 	}
 
-	if (WriteFile(file, &info, sizeof(BITMAPINFOHEADER), &bwritten, NULL) == false)
+	if (WriteFile(file, &info, sizeof(BITMAPINFOHEADER), &bwritten, nullptr) == false)
 	{
 		CloseHandle(file);
 		return false;
 	}
 
-	if (WriteFile(file, image, (DWORD)paddedSize, &bwritten, NULL) == false)
+	if (WriteFile(file, image, (DWORD)paddedSize, &bwritten, nullptr) == false)
 	{
 		CloseHandle(file);
 		return false;

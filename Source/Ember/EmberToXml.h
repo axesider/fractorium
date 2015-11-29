@@ -331,7 +331,7 @@ public:
 		//Add the edit attributes.
 		//Date.
 		myTime = time(nullptr);
-#ifdef WIN32
+#ifdef _MSC_VER
 		tm localt;
 		localtime_s(&localt, &myTime);
 		strftime(timeString, 128, "%a %b %d %H:%M:%S %z %Y", &localt);//XXX use standard time format including timezone.
@@ -753,6 +753,8 @@ private:
 		case MOTION_SAW:
 			os << "\"saw\"";
 			break;
+        default:
+            break;
 		}
 
 		T r = 0.0;
@@ -761,7 +763,7 @@ private:
 		T cx = 0.0;
 		T cy = 0.0;
 
-		for (int i = 0; i < motion.m_MotionParams.size(); ++i)
+		for (size_t i = 0; i < motion.m_MotionParams.size(); ++i)
 		{
 			switch(motion.m_MotionParams[i].first)
 			{
@@ -818,7 +820,10 @@ private:
 				break;
 			case FLAME_MOTION_VIBRANCY:
 				os << " vibrancy=\"" << motion.m_MotionParams[i].second << "\"";
-				break;
+                break;
+            case FLAME_MOTION_NONE:
+            default:
+                break;
 			}
 		}
 

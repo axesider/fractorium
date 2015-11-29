@@ -624,7 +624,7 @@ public:
 	{
 		bool postid, addfinal = false;
 		int var, samed, multid, samepost;
-		glm::length_t i, j, k, n;
+		size_t n;
 		size_t varCount = m_VariationList.Size();
 		Palette<T> palette;
 
@@ -679,7 +679,7 @@ public:
 		samepost = m_Rand.RandBit();
 
 		//Loop over xforms.
-		for (i = 0; i < ember.TotalXformCount(); i++)
+		for (size_t i = 0; i < ember.TotalXformCount(); i++)
 		{
 			Xform<T>* xform = ember.GetTotalXform(i);
 
@@ -700,9 +700,9 @@ public:
 			{
 				if (!postid)
 				{
-					for (j = 0; j < 2; j++)
+					for (int j = 0; j < 2; j++)
 					{
-						for (k = 0; k < 3; k++)
+						for (int k = 0; k < 3; k++)
 						{
 							if (samepost || (i == 0))
 								xform->m_Post.m_Mat[j][k] = m_Rand.Frand11<T>();
@@ -727,7 +727,7 @@ public:
 						//Copy the same variations from the previous xform.
 						Xform<T>* prevXform = ember.GetXform(i - 1);
 
-						for (j = 0; j < prevXform->TotalVariationCount(); j++)
+						for (size_t j = 0; j < prevXform->TotalVariationCount(); j++)
 							xform->AddVariation(prevXform->GetVariation(j)->Copy());
 					}
 					else
@@ -742,7 +742,7 @@ public:
 						//Randomly choose n variations, and change their weights.
 						//A var can be selected more than once, further reducing
 						//the probability that multiple vars are used.
-						for (j = 0; j < n; j++)
+						for (size_t j = 0; j < n; j++)
 						{
 							if (var != -2)
 							{
@@ -777,7 +777,7 @@ public:
 				//Randomly choose n variations, and change their weights.
 				//A var can be selected more than once, further reducing
 				//the probability that multiple vars are used.
-				for (j = 0; j < n; j++)
+				for (size_t j = 0; j < n; j++)
 				{
 					if (var != -2)
 					{
@@ -795,7 +795,7 @@ public:
 			}
 
 			//Randomize parametric variations.
-			for (j = 0; j < xform->TotalVariationCount(); j++)
+			for (size_t j = 0; j < xform->TotalVariationCount(); j++)
 				xform->GetVariation(j)->Random(m_Rand);
 		}
 
@@ -975,7 +975,7 @@ public:
 
 		while (ntries++ < 100)
 		{
-			size_t i = m_Rand.Rand() % ember.TotalXformCount();
+			intmax_t i = m_Rand.Rand() % ember.TotalXformCount();
 
 			if (i != excluded)
 			{

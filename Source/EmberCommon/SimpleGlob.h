@@ -176,7 +176,7 @@ enum SG_Error {
 # endif
 # define sg_strcmp          ::_mbscmp
 # define sg_strcasecmp      ::_mbsicmp
-# define SOCHAR_T           byte
+# define SOCHAR_T           unsigned char
 #else
 # include <sys/types.h>
 # include <sys/stat.h>

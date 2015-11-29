@@ -739,7 +739,7 @@ public:
 			{
 				T t[3], s[4] = { 0, 0, 0, 0 };
 
-				for (glm::length_t k = 0; k < size; k++)
+				for (size_t k = 0; k < size; k++)
 				{
 					Palette<T>::RgbToHsv(glm::value_ptr(embers[k].m_Palette[i]), t);
 
@@ -1080,7 +1080,7 @@ public:
 	/// <param name="rand">The random context to use for generating random symmetry</param>
 	void AddSymmetry(int sym, QTIsaac<ISAAC_SIZE, ISAAC_INT>& rand)
 	{
-		size_t i, k, result = 0;
+		size_t i, result = 0;
 		T a;
 
 		if (sym == 0)
@@ -1132,7 +1132,7 @@ public:
 
 		a = T(2 * M_PI / sym);
 
-		for (k = 1; k < sym; k++)
+		for (int k = 1; k < sym; k++)
 		{
 			i = XformCount();
 			Xform<T> xform;
@@ -1362,6 +1362,9 @@ public:
 				case FLAME_MOTION_VIBRANCY:
 					APP_FMP(m_Vibrancy);
 					break;
+                case FLAME_MOTION_NONE:
+                default:
+                    break;
 				}
 			}
 		}

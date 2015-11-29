@@ -11,7 +11,9 @@
 template <typename T, typename bucketT>
 bool EmberAnimate(EmberOptions& opt)
 {
+#ifdef USECL
 	OpenCLWrapper wrapper;
+#endif
 
 	std::cout.imbue(std::locale(""));
 
@@ -21,7 +23,11 @@ bool EmberAnimate(EmberOptions& opt)
 	if (opt.OpenCLInfo())
 	{
 		cout << "\nOpenCL Info: " << endl;
+#ifdef USECL
 		cout << wrapper.DumpInfo();
+#else
+		cout << "This version was compiled without CL support" << std::endl;
+#endif
 		return true;
 	}
 
@@ -82,6 +88,7 @@ bool EmberAnimate(EmberOptions& opt)
 	}
 	else
 	{
+#ifdef USECL
 		cout << "Using OpenCL to render." << endl;
 
 		if (opt.Verbose())
@@ -101,6 +108,7 @@ bool EmberAnimate(EmberOptions& opt)
 			cout << "Bits per channel cannot be anything other than 8 with OpenCL, setting to 8." << endl;
 			opt.BitsPerChannel(8);
 		}
+#endif
 	}
 
 	if (opt.Format() != "jpg" &&
@@ -271,8 +279,10 @@ bool EmberAnimate(EmberOptions& opt)
 
 		if (opt.Format() == "png")
 			writeSuccess = WritePng(filename.c_str(), finalImagep, renderer->FinalRasW(), renderer->FinalRasH(), opt.BitsPerChannel() / 8, opt.PngComments(), comments, opt.Id(), opt.Url(), opt.Nick());
+#ifdef USE_JPG
 		else if (opt.Format() == "jpg")
 			writeSuccess = WriteJpeg(filename.c_str(), finalImagep, renderer->FinalRasW(), renderer->FinalRasH(), opt.JpegQuality(), opt.JpegComments(), comments, opt.Id(), opt.Url(), opt.Nick());
+#endif
 		else if (opt.Format() == "ppm")
 			writeSuccess = WritePpm(filename.c_str(), finalImagep, renderer->FinalRasW(), renderer->FinalRasH());
 		else if (opt.Format() == "bmp")
@@ -375,7 +385,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//Required for large allocs, else GPU memory usage will be severely limited to small sizes.
 	//This must be done in the application and not in the EmberCL DLL.
-#ifdef WIN32
+#ifdef _MSC_VER
 	_putenv_s("GPU_MAX_ALLOC_PERCENT", "100");
 #else
 	putenv(const_cast<char*>("GPU_MAX_ALLOC_PERCENT=100"));

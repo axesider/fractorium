@@ -140,13 +140,13 @@ private:
 	/// Default constructor. This should never be used, instead use the one that takes arguments.
 	/// </summary>
 	EmberOptionEntry()
-	{
-		m_OptionUse = OPT_USE_ALL;
-		m_Option.nArgType = SO_NONE;
-		m_Option.nId = 0;
-		m_Option.pszArg = _T("--fillmein");
-		m_DocString = "Dummy doc";
-	}
+        :m_OptionUse(OPT_USE_ALL)
+		,m_DocString("Dummy doc")
+		{
+            m_Option.nArgType = SO_NONE;
+            m_Option.nId = 0;
+            m_Option.pszArg = _T("--fillmein");
+		}
 
 public:
 	/// <summary>

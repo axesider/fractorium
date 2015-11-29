@@ -1750,7 +1750,7 @@ public:
 	/// <param name="index">The index of the parameter to assign to</param>
 	/// <param name="val">The value to assign</param>
 	/// <returns>True if the index was in range, else false.</returns>
-	virtual bool SetParamVal(int index, T val)
+	virtual bool SetParamVal(size_t index, T val)
 	{
 		bool b = false;
 

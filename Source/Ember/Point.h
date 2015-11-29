@@ -131,7 +131,7 @@ static int SortPointByY(const Point<T>& a, const Point<T>& b)
 template <typename T>
 struct EMBER_API Color : public v4T
 {
-#ifndef _WIN32
+#ifndef _MSC_VER
 using v4T::r;
 using v4T::g;
 using v4T::b;
@@ -185,7 +185,7 @@ public:
 	template <typename U>
 	Color<T>& operator = (const Color<U>& color)
 	{
-#ifdef _WIN32
+#ifdef _MSC_VER
 		v4T::operator=<U>(color);
 #else
 		v4T::template operator=<U>(color);

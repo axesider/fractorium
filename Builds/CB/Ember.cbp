@@ -5,12 +5,12 @@
 		<Option title="Ember" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Headers/Filters/;/Headers/Xml/;" />
+		<Option virtualFolders="Headers\Filters\;\Headers\Xml\;" />
 		<Build>
 			<Target title="Debug x64">
 				<Option output="Ember" prefix_auto="1" extension_auto="1" />
 				<Option type="3" />
-				<Option compiler="gcc" />
+				<Option compiler="msvc8" />
 				<Option createDefFile="1" />
 				<Option createStaticLib="1" />
 				<Compiler>
@@ -52,6 +52,7 @@
 				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-Wa,-mbig-obj" />
 					<Add option="-D_M_X64" />
 					<Add option="-D_USRDLL" />
 					<Add option="-DNDEBUG" />
@@ -81,31 +82,24 @@
 			<Add option="-march=k8" />
 			<Add option="-fomit-frame-pointer" />
 			<Add option="-Wnon-virtual-dtor" />
-			<Add option="-Wshadow" />
-			<Add option="-Winit-self" />
-			<Add option="-Wredundant-decls" />
-			<Add option="-Wcast-align" />
-			<Add option="-Winline" />
 			<Add option="-Wunreachable-code" />
 			<Add option="-Wmissing-include-dirs" />
 			<Add option="-Wswitch-enum" />
 			<Add option="-Wswitch-default" />
 			<Add option="-Wmain" />
-			<Add option="-pedantic" />
-			<Add option="-Wzero-as-null-pointer-constant" />
 			<Add option="-std=c++11" />
 			<Add option="-Wfatal-errors" />
-			<Add option="-Wall" />
 			<Add option="-fpermissive" />
-			<Add option="-fPIC" />
 			<Add option="-Wno-unused-parameter" />
 			<Add option="-Wno-unused-function" />
-			<Add option="-Wold-style-cast" />
-			<Add directory="/usr/include/libxml2" />
+			<Add directory="../../../libxml2/include" />
+			<Add directory="../../../tbb/include" />
+			<Add directory="../../../glm" />
 		</Compiler>
 		<Linker>
 			<Add library="tbb" />
 			<Add library="libxml2" />
+			<Add directory="../../../libxml2-2.7.8.win32/lib" />
 		</Linker>
 		<Unit filename="../../Source/Ember/Affine2D.cpp" />
 		<Unit filename="../../Source/Ember/Affine2D.h" />
@@ -146,6 +140,7 @@
 		<Extensions>
 			<code_completion />
 			<debugger />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

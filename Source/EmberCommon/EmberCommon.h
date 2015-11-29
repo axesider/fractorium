@@ -231,6 +231,9 @@ static T NextLowestEvenDiv(T numerator, T denominator)
 	return result;
 }
 
+#ifndef USECL
+#define GLuint unsigned int
+#endif
 /// <summary>
 /// Wrapper for creating a renderer of the specified type.
 /// First template argument expected to be float or double for CPU renderer,
@@ -258,6 +261,7 @@ static Renderer<T, bucketT>* CreateRenderer(eRendererType renderType, uint platf
 		}
 		else if (renderType == OPENCL_RENDERER)
 		{
+#ifdef USECL
 			s = "OpenCL";
 			renderer = unique_ptr<Renderer<T, bucketT>>(new RendererCL<T>(platform, device, shared, texId));
 
@@ -269,6 +273,7 @@ static Renderer<T, bucketT>* CreateRenderer(eRendererType renderType, uint platf
 				errorReport.AddToReport("Error initializing OpenCL renderer, using CPU renderer instead.");
 				renderer = unique_ptr<Renderer<T, bucketT>>(new Renderer<T, bucketT>());
 			}
+#endif
 		}
 	}
 	catch (...)

@@ -38,9 +38,9 @@ public:
 	}
 
 	NamedBuffer(const cl::Buffer& buff, const string& name)
+        :m_Buffer(buff)
+        ,m_Name(name)
 	{
-		m_Buffer = buff;
-		m_Name = name;
 	}
 
 	cl::Buffer m_Buffer;

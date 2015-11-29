@@ -4,18 +4,22 @@
 /// Precompiled header file. Place all system includes here with appropriate #defines for different operating systems and compilers.
 /// </summary>
 
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #define _USE_MATH_DEFINES
 
 #ifdef _WIN32
-	#define basename(x) _strdup(x)
-	#define snprintf _snprintf
+#include <SDKDDKVer.h>
+#include <windows.h>
+#define basename(x) _strdup(x)
+#ifdef _MSC_VER
+	//#define snprintf _snprintf
 	#define snprintf_s _snprintf_s
+#endif
 	#define WIN32_LEAN_AND_MEAN
 	#define EMBER_OS "WIN"
 
-	#include <SDKDDKVer.h>
-	#include <windows.h>
 #elif __APPLE__
 	#define EMBER_OS "OSX"
 #else

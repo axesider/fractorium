@@ -1,7 +1,9 @@
 #pragma once
 
 #include "EmberCLPch.h"
+#ifdef USECL
 #include "OpenCLWrapper.h"
+#endif
 #include "IterOpenCLKernelCreator.h"
 #include "DEOpenCLKernelCreator.h"
 #include "FinalAccumOpenCLKernelCreator.h"
@@ -212,6 +214,7 @@ private:
 	//Kernels.
 	string m_IterKernel;
 
+#ifdef USECL
 	OpenCLWrapper m_Wrapper;
 	cl::ImageFormat m_PaletteFormat;
 	cl::ImageFormat m_FinalFormat;
@@ -220,6 +223,7 @@ private:
 	GLuint m_OutputTexID;
 	EmberCL<T> m_EmberCL;
 	vector<XformCL<T>> m_XformsCL;
+#endif
 	vector<glm::highp_uvec2> m_Seeds;
 	Palette<float> m_DmapCL;//Used instead of the base class' m_Dmap because OpenCL only supports float textures.
 	CarToRasCL<T> m_CarToRasCL;

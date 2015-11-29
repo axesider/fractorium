@@ -24,9 +24,10 @@ public:
 	/// Constructor which sets the palette index to random and allocates space to hold the color entries.
 	/// </summary>
 	Palette()
+		:m_Index(-1)
+        ,m_Name("-")
+
 	{
-		m_Name = "-";
-		m_Index = -1;
 		m_Entries.resize(COLORMAP_LENGTH);
 		Clear();
 	}
@@ -182,7 +183,7 @@ public:
 	/// <param name="black">Set all colors to black if true, else white</param>
 	void Clear(bool black = true)
 	{
-		for (glm::length_t i = 0; i < Size(); i++)
+		for (glm::length_t i = 0; i < (glm::length_t)Size(); i++)
 		{
 			for (glm::length_t j = 0; j < 4; j++)
 			{

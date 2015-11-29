@@ -40,6 +40,12 @@
 					<Add option="-D_M_X64" />
 					<Add option="-DNDEBUG" />
 					<Add option="-D_CONSOLE" />
+					<Add directory="../../../jpeg-6b" />
+					<Add directory="../../../libpng-1.6.17" />
+					<Add directory="../../../libxml2-2.7.8.win32/include" />
+					<Add directory="../../../tbb43_20150611oss/include" />
+					<Add directory="../../../glm" />
+					<Add directory="../../../OpenCL" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -62,22 +68,14 @@
 			<Add option="-march=k8" />
 			<Add option="-fomit-frame-pointer" />
 			<Add option="-Wnon-virtual-dtor" />
-			<Add option="-Wshadow" />
 			<Add option="-Winit-self" />
-			<Add option="-Wredundant-decls" />
-			<Add option="-Wcast-align" />
-			<Add option="-Wunreachable-code" />
 			<Add option="-Wswitch-enum" />
 			<Add option="-Wswitch-default" />
 			<Add option="-Wmain" />
-			<Add option="-Wzero-as-null-pointer-constant" />
 			<Add option="-std=c++11" />
 			<Add option="-Wfatal-errors" />
-			<Add option="-Wall" />
 			<Add option="-fpermissive" />
-			<Add option="-fPIC" />
 			<Add option="-Wno-unused-function" />
-			<Add option="-Wold-style-cast" />
 			<Add directory="/usr/include/libxml2" />
 			<Add directory="../../Source/Ember" />
 			<Add directory="../../Source/EmberCL" />
@@ -92,6 +90,9 @@
 			<Add library="EmberCL" />
 			<Add library="OpenCL" />
 			<Add directory="./" />
+			<Add directory="../../../libpng-1.6.17" />
+			<Add directory="../../../jpeg-6b" />
+			<Add directory="../../../tbb43_20150611oss/lib" />
 		</Linker>
 		<ExtraCommands>
 			<Add after="cp --update ../../Data/flam3-palettes.xml ./flam3-palettes.xml" />
@@ -111,6 +112,7 @@
 		<Extensions>
 			<code_completion />
 			<debugger />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
