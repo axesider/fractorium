@@ -321,11 +321,11 @@
 	"EmberPch.h"
 	"RendererBase.h"
 
-1437809263 source:y:\repozytoria\fractorium\source\ember\affine2d.cpp
+1448832116 source:y:\repozytoria\fractorium\source\ember\affine2d.cpp
 	"EmberPch.h"
 	"Affine2D.h"
 
-1438291255 y:\repozytoria\fractorium\source\ember\emberpch.h
+1448833691 y:\repozytoria\fractorium\source\ember\emberpch.h
 	<SDKDDKVer.h>
 	<windows.h>
 	<libgen.h>
@@ -353,6 +353,7 @@
 	<thread>
 	<time.h>
 	<vector>
+	<unordered_map>
 	"libxml/parser.h"
 	"libxml2/libxml/parser.h"
 	<tbb/task_group.h>
@@ -1169,13 +1170,13 @@
 1437809263 y:\repozytoria\fractorium\source\ember\affine2d.h
 	"Utils.h"
 
-1438195554 y:\repozytoria\fractorium\source\ember\utils.h
+1448834943 y:\repozytoria\fractorium\source\ember\utils.h
 	"Isaac.h"
 
-1437809263 y:\repozytoria\fractorium\source\ember\isaac.h
-	"EmberDefines.h"
+1448832116 y:\repozytoria\fractorium\source\ember\isaac.h
+	"Timing.h"
 
-1438194635 y:\repozytoria\fractorium\source\ember\emberdefines.h
+1448834320 y:\repozytoria\fractorium\source\ember\emberdefines.h
 	"EmberPch.h"
 
 1438280362 source:y:\repozytoria\fractorium\source\ember\dllmain.cpp
@@ -1249,7 +1250,7 @@
 	"Affine2D.h"
 	"Timing.h"
 
-1437925458 y:\repozytoria\fractorium\source\ember\timing.h
+1448832119 y:\repozytoria\fractorium\source\ember\timing.h
 	"EmberDefines.h"
 
 1437809263 y:\repozytoria\fractorium\source\ember\variations02.h

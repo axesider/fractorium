@@ -199,7 +199,7 @@ static bool ReadFile(const char* filename, string& buf, bool nullTerminate = tru
 			struct _stat statBuf;
 
 #if defined(_WIN32) || defined(__APPLE__)
-			#if _MSC_VER>=1900		
+			#if _MSC_VER>=1900
 			int statResult = _fstat(_fileno(f), &statBuf);
 			#else
 			int statResult = _fstat(f->_file, &statBuf);//Get data associated with file.
@@ -912,7 +912,6 @@ static string GetPath(const string& filename)
 template <typename T>
 static inline T Arg(char* name, T def)
 {
-#ifdef MSC_VER
 	char* ch;
 	T returnVal;
 #ifdef _MSC_VER

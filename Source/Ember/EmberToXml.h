@@ -778,8 +778,6 @@ private:
 		case MOTION_SAW:
 			os << "\"saw\"";
 			break;
-        default:
-            break;
 		}
 
 		T r = 0.0;
@@ -846,9 +844,6 @@ private:
             case FLAME_MOTION_NONE:
             default:
                 break;
-			case FLAME_MOTION_NONE:
-			default:
-				break;
 			}
 		}
 
