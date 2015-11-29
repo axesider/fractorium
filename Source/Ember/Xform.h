@@ -370,7 +370,7 @@ public:
 		{
 			for (auto v : variations)
 			{
-				if (v != nullptr && v->VariationId() == id)
+				if (v && v->VariationId() == id)
 				{
 					var = v;
 					keepGoing = false;
@@ -395,7 +395,7 @@ public:
 		{
 			for (auto v : variations)
 			{
-				if (v != nullptr && v->Name() == name)
+				if (v && v->Name() == name)
 				{
 					var = v;
 					keepGoing = false;
@@ -447,7 +447,7 @@ public:
 		{
 			for (size_t i = 0; i < variations.size(); i++)
 			{
-				if (variations[i] != nullptr && variations[i]->VariationId() == id)
+				if (variations[i] && variations[i]->VariationId() == id)
 				{
 					delete variations[i];
 					variations.erase(variations.begin() + i);
@@ -768,7 +768,7 @@ public:
 
 				//At this point, we've added if needed, or just applied the motion func to the weight.
 				//Now apply the motion func to the params if needed.
-				if (motParVar != nullptr)
+				if (motParVar)
 				{
 					auto parVar = dynamic_cast<ParametricVariation<T>*>(var);
 					auto params = parVar->Params();
@@ -915,7 +915,6 @@ public:
 			AllVarsFunc([&] (vector<Variation<T>*>& variations, bool& keepGoing)
 			{
 				for (auto var : variations)
-				//for (size_t i = 0; i < variations.size(); i++)
 				{
 					if (var->m_Weight != 0)//This should never happen, but just to be safe.
 					{
@@ -1273,7 +1272,7 @@ private:
 		if (in == 0)
 			return 0;
 		else
-			return pow(T(10.0), -log(T(1.0) / T(in)) / log(T(2)));
+			return std::pow(T(10.0), -std::log(T(1.0) / T(in)) / std::log(T(2)));
 	}
 
 	vector<T> m_Xaos;//Xaos vector which affects the probability that this xform is chosen. Usually empty.

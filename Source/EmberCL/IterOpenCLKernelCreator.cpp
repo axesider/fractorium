@@ -2,40 +2,32 @@
 #include "IterOpenCLKernelCreator.h"
 
 //#define STRAIGHT_RAND 1
-#define USE_CASE 1
 
 namespace EmberCLns
 {
-/// <summary>
-/// Empty constructor that does nothing. The user must call the one which takes a bool
-/// argument before using this class.
-/// This constructor only exists so the class can be a member of a class.
-/// </summary>
-template <typename T>
-IterOpenCLKernelCreator<T>::IterOpenCLKernelCreator()
-{
-}
-
 /// <summary>
 /// Constructor that sets up some basic entry point strings and creates
 /// the zeroization kernel string since it requires no conditional inputs.
 /// </summary>
 template <typename T>
-IterOpenCLKernelCreator<T>::IterOpenCLKernelCreator(bool nVidia)
+IterOpenCLKernelCreator<T>::IterOpenCLKernelCreator()
 {
-	m_NVidia = nVidia;
 	m_IterEntryPoint = "IterateKernel";
 	m_ZeroizeEntryPoint = "ZeroizeKernel";
+	m_SumHistEntryPoint = "SumHisteKernel";
 	m_ZeroizeKernel = CreateZeroizeKernelString();
+	m_SumHistKernel = CreateSumHistKernelString();
 }
 
 /// <summary>
 /// Accessors.
 /// </summary>
 
-template <typename T> string IterOpenCLKernelCreator<T>::ZeroizeKernel() { return m_ZeroizeKernel; }
-template <typename T> string IterOpenCLKernelCreator<T>::ZeroizeEntryPoint() { return m_ZeroizeEntryPoint; }
-template <typename T> string IterOpenCLKernelCreator<T>::IterEntryPoint() { return m_IterEntryPoint; }
+template <typename T> const string& IterOpenCLKernelCreator<T>::ZeroizeKernel() const { return m_ZeroizeKernel; }
+template <typename T> const string& IterOpenCLKernelCreator<T>::ZeroizeEntryPoint() const { return m_ZeroizeEntryPoint; }
+template <typename T> const string& IterOpenCLKernelCreator<T>::SumHistKernel() const { return m_SumHistKernel; }
+template <typename T> const string& IterOpenCLKernelCreator<T>::SumHistEntryPoint() const { return m_SumHistEntryPoint; }
+template <typename T> const string& IterOpenCLKernelCreator<T>::IterEntryPoint() const { return m_IterEntryPoint; }
 
 /// <summary>
 /// Create the iteration kernel string using the Cuburn method.
@@ -46,16 +38,20 @@ template <typename T> string IterOpenCLKernelCreator<T>::IterEntryPoint() { retu
 /// <param name="doAccum">Debugging parameter to include or omit accumulating to the histogram. Default: true.</param>
 /// <returns>The kernel string</returns>
 template <typename T>
-string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, string& parVarDefines, bool lockAccum, bool doAccum)
+string IterOpenCLKernelCreator<T>::CreateIterKernelString(const Ember<T>& ember, string& parVarDefines, bool lockAccum, bool doAccum)
 {
 	bool doublePrecision = typeid(T) == typeid(double);
 	size_t i, v, varIndex, varCount, totalXformCount = ember.TotalXformCount();
 	ostringstream kernelIterBody, xformFuncs, os;
 	vector<Variation<T>*> variations;
 
-	xformFuncs << "\n" << parVarDefines << endl;
+	xformFuncs << VariationStateString(ember);
+	xformFuncs << parVarDefines << endl;
 	ember.GetPresentVariations(variations);
-	for (auto var : variations) if (var) xformFuncs << var->OpenCLFuncsString();
+
+	for (auto var : variations)
+		if (var)
+			xformFuncs << var->OpenCLFuncsString();
 
 	for (i = 0; i < totalXformCount; i++)
 	{
@@ -69,7 +65,7 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 
 		v = varIndex = varCount = 0;
 		xformFuncs <<
-			"void Xform" << i << "(__constant XformCL* xform, __constant real_t* parVars, Point* inPoint, Point* outPoint, uint2* mwc)\n" <<
+			"void Xform" << i << "(__constant XformCL* xform, __constant real_t* parVars, Point* inPoint, Point* outPoint, uint2* mwc, VariationState* varState)\n" <<
 			"{\n"
 			"	real_t transX, transY, transZ;\n"
 			"	real4 vIn, vOut = 0.0;\n";
@@ -222,16 +218,19 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 
 	os <<
 		ConstantDefinesString(doublePrecision) <<
-		InlineMathFunctionsString <<
-		ClampRealFunctionString <<
+		GlobalFunctionsString(ember) <<
 		RandFunctionString <<
 		PointCLStructString <<
 		XformCLStructString <<
 		EmberCLStructString <<
 		UnionCLStructString <<
 		CarToRasCLStructString <<
-		CarToRasFunctionString <<
-		AtomicString(doublePrecision, m_NVidia) <<
+		CarToRasFunctionString;
+
+	if (lockAccum)
+		os << AtomicString();
+
+	os <<
 		xformFuncs.str() <<
 		"__kernel void " << m_IterEntryPoint << "(\n" <<
 		"	uint iterCount,\n"
@@ -240,12 +239,13 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 		"	__constant EmberCL* ember,\n"
 		"	__constant XformCL* xforms,\n"
 		"	__constant real_t* parVars,\n"
-		"	__global uchar* xformDistributions,\n"//Using uchar is quicker than uint. Can't be constant because the size can be too large to fit when using xaos.//FINALOPT
+		"	__global uchar* xformDistributions,\n"//Using uchar is quicker than uint. Can't be constant because the size can be too large to fit when using xaos.
 		"	__constant CarToRasCL* carToRas,\n"
-		"	__global real4reals* histogram,\n"
+		"	__global real4reals_bucket* histogram,\n"
 		"	uint histSize,\n"
 		"	__read_only image2d_t palette,\n"
 		"	__global Point* points\n"
+		//"	uint startRender\n"
 		"\t)\n"
 		"{\n"
 		"	bool fuse, ok;\n"
@@ -264,8 +264,9 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 		"		CLK_ADDRESS_CLAMP_TO_EDGE |\n"//Clamp to edge
 		"		CLK_FILTER_NEAREST;\n"//Don't interpolate
 		"	uint threadXY = (THREAD_ID_X + THREAD_ID_Y);\n"
-		"	uint threadXDivRows = (THREAD_ID_X / (NTHREADS / THREADS_PER_WARP));\n"
+		"	uint threadXDivRows = (THREAD_ID_X / NWARPS);\n"
 		"	uint threadsMinus1 = NTHREADS - 1;\n"
+		"	VariationState varState;\n"
 		;
 
 	os <<
@@ -281,6 +282,9 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 		"	{\n"
 		"		fuse = true;\n"
 		"		itersToDo = fuseCount;\n"
+		//Calling MwcNextNeg1Pos1() twice is deliberate. The first call to mwc is not very random since it just does
+		//an xor. So it must be called twice to get it in a good random state.
+		"		firstPoint.m_X = MwcNextNeg1Pos1(&mwc);\n"
 		"		firstPoint.m_X = MwcNextNeg1Pos1(&mwc);\n"
 		"		firstPoint.m_Y = MwcNextNeg1Pos1(&mwc);\n"
 		"		firstPoint.m_Z = 0.0;\n"
@@ -293,7 +297,13 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 		"		itersToDo = iterCount;\n"
 		"		firstPoint = points[pointsIndex];\n"
 		"	}\n"
-		"\n";
+		"\n"
+		;
+
+	auto varStateString = VariationStateInitString(ember);
+
+	if (!varStateString.empty())
+		os << varStateString << "\n\n";
 
 		//This is done once initially here and then again after each swap-sync in the main loop.
 		//This along with the randomness that the point shuffle provides gives sufficient randomness
@@ -339,7 +349,6 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 
 		for (i = 0; i < ember.XformCount(); i++)
 		{
-#ifdef USE_CASE
 			if (i == 0)
 			{
 			os <<
@@ -350,7 +359,7 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 			os <<
 		"				case " << i << ":\n"
 		"				{\n" <<
-		"					Xform" << i << "(&(xforms[" << i << "]), parVars, &firstPoint, &secondPoint, &mwc);\n" <<
+		"					Xform" << i << "(&(xforms[" << i << "]), parVars, &firstPoint, &secondPoint, &mwc, &varState);\n" <<
 		"					break;\n"
 		"				}\n";
 
@@ -359,19 +368,6 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 			os <<
 		"			}\n";
 			}
-#else
-			if (i == 0)
-				os <<
-		"			if (secondPoint.m_LastXfUsed == " << i << ")\n";
-			else
-				os <<
-		"			else if (secondPoint.m_LastXfUsed == " << i << ")\n";
-
-		os <<
-		"			{\n" <<
-		"				Xform" << i << "(&(xforms[" << i << "]), parVars, &firstPoint, &secondPoint, &mwc);\n" <<
-		"			}\n";
-#endif
 		}
 
 		os <<
@@ -441,7 +437,7 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 			"		if ((xforms[" << finalIndex << "].m_Opacity == 1) || (MwcNext01(&mwc) < xforms[" << finalIndex << "].m_Opacity))\n"
 			"		{\n"
 			"			tempPoint.m_LastXfUsed = secondPoint.m_LastXfUsed;\n"
-			"			Xform" << finalIndex << "(&(xforms[" << finalIndex << "]), parVars, &secondPoint, &tempPoint, &mwc);\n"
+			"			Xform" << finalIndex << "(&(xforms[" << finalIndex << "]), parVars, &secondPoint, &tempPoint, &mwc, &varState);\n"
 			"			secondPoint = tempPoint;\n"
 			"		}\n"
 			"\n";
@@ -506,41 +502,16 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 
 			if (lockAccum)
 			{
-				if (typeid(T) == typeid(double))
-				{
-					os <<
-		"				AtomicAdd(&(histogram[histIndex].m_Reals[0]), (real_t)palColor1.x * xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n"//Always apply opacity, even though it's usually 1.
-		"				AtomicAdd(&(histogram[histIndex].m_Reals[1]), (real_t)palColor1.y * xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n"
-		"				AtomicAdd(&(histogram[histIndex].m_Reals[2]), (real_t)palColor1.z * xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n"
-		"				AtomicAdd(&(histogram[histIndex].m_Reals[3]), (real_t)palColor1.w * xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n";
-				}
-				else
-				{
-					os <<
-		"				AtomicAdd(&(histogram[histIndex].m_Reals[0]), palColor1.x * xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n"//Always apply opacity, even though it's usually 1.
-		"				AtomicAdd(&(histogram[histIndex].m_Reals[1]), palColor1.y * xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n"
-		"				AtomicAdd(&(histogram[histIndex].m_Reals[2]), palColor1.z * xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n"
-		"				AtomicAdd(&(histogram[histIndex].m_Reals[3]), palColor1.w * xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n";
-				}
+				os <<
+		"				AtomicAdd(&(histogram[histIndex].m_Reals[0]), palColor1.x * (real_bucket_t)xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n"//Always apply opacity, even though it's usually 1.
+		"				AtomicAdd(&(histogram[histIndex].m_Reals[1]), palColor1.y * (real_bucket_t)xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n"
+		"				AtomicAdd(&(histogram[histIndex].m_Reals[2]), palColor1.z * (real_bucket_t)xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n"
+		"				AtomicAdd(&(histogram[histIndex].m_Reals[3]), palColor1.w * (real_bucket_t)xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n";
 			}
 			else
 			{
-				if (typeid(T) == typeid(double))
-				{
-					os <<
-		"				real4 realColor;\n"
-		"\n"
-		"				realColor.x = (real_t)palColor1.x;\n"
-		"				realColor.y = (real_t)palColor1.y;\n"
-		"				realColor.z = (real_t)palColor1.z;\n"
-		"				realColor.w = (real_t)palColor1.w;\n"
-		"				histogram[histIndex].m_Real4 += (realColor * xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n";
-				}
-				else
-				{
-					os <<
-		"				histogram[histIndex].m_Real4 += (palColor1 * xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n";
-				}
+				os <<
+		"				histogram[histIndex].m_Real4 += (palColor1 * (real_bucket_t)xforms[secondPoint.m_LastXfUsed].m_VizAdjusted);\n";//real_bucket_t should always be float.
 			}
 
 			os <<
@@ -567,6 +538,54 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 #endif
 		"	barrier(CLK_GLOBAL_MEM_FENCE);\n"
 		"}\n";
+
+	return os.str();
+}
+
+/// <summary>
+/// Return a string containing all of the global functions needed by the passed in ember.
+/// </summary>
+/// <param name="ember">The ember to create the global function strings from</param>
+/// <returns>String of all global function names and bodies</returns>
+template <typename T>
+string IterOpenCLKernelCreator<T>::GlobalFunctionsString(const Ember<T>& ember)
+{
+	size_t i, j, xformCount = ember.TotalXformCount();
+	vector<string> funcNames;//Can't use a set here because they sort and we must preserve the insertion order due to nested function calls.
+	ostringstream os;
+	static string zeps = "Zeps";
+
+	for (i = 0; i < xformCount; i++)
+	{
+		if (auto xform = ember.GetTotalXform(i))
+		{
+			size_t varCount = xform->TotalVariationCount();
+
+			if (xform->NeedPrecalcAngles())
+				if (!Contains(funcNames, zeps))
+					funcNames.push_back(zeps);
+
+			for (j = 0; j < varCount; j++)
+			{
+				if (auto var = xform->GetVariation(j))
+				{
+					auto names = var->OpenCLGlobalFuncNames();
+
+					for (auto& name : names)
+						if (!Contains(funcNames, name))
+							funcNames.push_back(name);
+				}
+			}
+		}
+	}
+
+	if (ember.ProjBits())
+		if (!Contains(funcNames, zeps))
+			funcNames.push_back(zeps);
+
+	for (auto& funcName : funcNames)
+		if(auto text = m_FunctionMapper.GetGlobalFunc(funcName))
+			os << *text << endl;
 
 	return os.str();
 }
@@ -599,9 +618,9 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 /// #define CURL_C2_2 3
 /// #define BLOB_LOW_3 4
 /// #define BLOB_HIGH_3 5
-/// #define BLOB_WAVES_ 6
+/// #define BLOB_WAVES_3 6
 ///
-/// The variations the use these #defines by first looking up the index of the
+/// The variations use these #defines by first looking up the index of the
 /// xform they belong to in the parent ember and generating the OpenCL string based on that
 /// in their overridden OpenCLString() functions.
 /// Template argument expected to be float or double.
@@ -611,10 +630,9 @@ string IterOpenCLKernelCreator<T>::CreateIterKernelString(Ember<T>& ember, strin
 /// <param name="doVals">True if the vector should be populated, else false. Default: true.</param>
 /// <param name="doString">True if the string should be populated, else false. Default: true.</param>
 template <typename T>
-void IterOpenCLKernelCreator<T>::ParVarIndexDefines(Ember<T>& ember, pair<string, vector<T>>& params, bool doVals, bool doString)
+void IterOpenCLKernelCreator<T>::ParVarIndexDefines(const Ember<T>& ember, pair<string, vector<T>>& params, bool doVals, bool doString)
 {
 	size_t i, j, k, size = 0, xformCount = ember.TotalXformCount();
-	Xform<T>* xform;
 	ostringstream os;
 
 	if (doVals)
@@ -622,23 +640,26 @@ void IterOpenCLKernelCreator<T>::ParVarIndexDefines(Ember<T>& ember, pair<string
 
 	for (i = 0; i < xformCount; i++)
 	{
-		if ((xform = ember.GetTotalXform(i)))
+		if (auto xform = ember.GetTotalXform(i))
 		{
 			size_t varCount = xform->TotalVariationCount();
 
 			for (j = 0; j < varCount; j++)
 			{
-				if (ParametricVariation<T>* parVar = dynamic_cast<ParametricVariation<T>*>(xform->GetVariation(j)))
+				if (auto parVar = dynamic_cast<ParametricVariation<T>*>(xform->GetVariation(j)))
 				{
 					for (k = 0; k < parVar->ParamCount(); k++)
 					{
-						if (doString)
-							os << "#define " << ToUpper(parVar->Params()[k].Name()) << "_" << i << " " << size << endl;//Uniquely identify this param in this variation in this xform.
+						if (!parVar->Params()[k].IsState())
+						{
+							if (doString)
+								os << "#define " << ToUpper(parVar->Params()[k].Name()) << "_" << i << " " << size << endl;//Uniquely identify this param in this variation in this xform.
 
-						if (doVals)
-							params.second.push_back(parVar->Params()[k].ParamVal());
+							if (doVals)
+								params.second.push_back(parVar->Params()[k].ParamVal());
 
-						size++;
+							size++;
+						}
 					}
 				}
 			}
@@ -650,6 +671,69 @@ void IterOpenCLKernelCreator<T>::ParVarIndexDefines(Ember<T>& ember, pair<string
 		os << "\n";
 		params.first = os.str();
 	}
+}
+
+/// <summary>
+/// Create the string needed for the struct whose values will change between each iteration.
+/// This is only needed for variations whose state changes.
+/// If none are present, the struct will be empty.
+/// </summary>
+/// <param name="ember">The ember to generate the variation state struct string for</param>
+/// <returns>The variation state struct string</returns>
+template <typename T>
+string IterOpenCLKernelCreator<T>::VariationStateString(const Ember<T>& ember)
+{
+	ostringstream os;
+
+	os << "typedef struct __attribute__ " ALIGN_CL " _VariationState\n{";
+
+	for (size_t i = 0; i < ember.TotalXformCount(); i++)
+	{
+		if (auto xform = ember.GetTotalXform(i))
+		{
+			for (size_t j = 0; j < xform->TotalVariationCount(); j++)
+			{
+				if (auto var = xform->GetVariation(j))
+				{
+					os << var->StateOpenCLString();
+				}
+			}
+		}
+	}
+
+	os << "\n} VariationState;\n\n";
+
+	return os.str();
+}
+
+/// <summary>
+/// Create the string needed for the initial state of the struct whose values will change between each iteration.
+/// This is only needed for variations whose state changes.
+/// If none are present, the returned init string will be empty.
+/// This will be called at the beginning of each kernel.
+/// </summary>
+/// <param name="ember">The ember to generate the variation state struct init string for</param>
+/// <returns>The variation state struct init string</returns>
+template <typename T>
+string IterOpenCLKernelCreator<T>::VariationStateInitString(const Ember<T>& ember)
+{
+	ostringstream os;
+
+	for (size_t i = 0; i < ember.TotalXformCount(); i++)
+	{
+		if (auto xform = ember.GetTotalXform(i))
+		{
+			for (size_t j = 0; j < xform->TotalVariationCount(); j++)
+			{
+				if (auto var = xform->GetVariation(j))
+				{
+					os << var->StateInitOpenCLString();
+				}
+			}
+		}
+	}
+
+	return os.str();
 }
 
 /// <summary>
@@ -669,7 +753,7 @@ void IterOpenCLKernelCreator<T>::ParVarIndexDefines(Ember<T>& ember, pair<string
 /// <param name="ember2">The second ember to compare</param>
 /// <returns>True if a rebuild is required, else false</returns>
 template <typename T>
-bool IterOpenCLKernelCreator<T>::IsBuildRequired(Ember<T>& ember1, Ember<T>& ember2)
+bool IterOpenCLKernelCreator<T>::IsBuildRequired(const Ember<T>& ember1, const Ember<T>& ember2)
 {
 	size_t i, j, xformCount = ember1.TotalXformCount();
 
@@ -716,7 +800,7 @@ bool IterOpenCLKernelCreator<T>::IsBuildRequired(Ember<T>& ember1, Ember<T>& emb
 /// </summary>
 /// <returns>The kernel string</returns>
 template <typename T>
-string IterOpenCLKernelCreator<T>::CreateZeroizeKernelString()
+string IterOpenCLKernelCreator<T>::CreateZeroizeKernelString() const
 {
 	ostringstream os;
 
@@ -736,6 +820,38 @@ string IterOpenCLKernelCreator<T>::CreateZeroizeKernelString()
 }
 
 /// <summary>
+/// Create the histogram summing kernel string.
+/// This is used when running with multiple GPUs. It takes
+/// two histograms present on a single device, source and dest,
+/// and adds the values of source to dest.
+/// It optionally sets all values of source to zero.
+/// </summary>
+/// <returns>The kernel string</returns>
+template <typename T>
+string IterOpenCLKernelCreator<T>::CreateSumHistKernelString() const
+{
+	ostringstream os;
+
+	os <<
+		ConstantDefinesString(typeid(T) == typeid(double)) <<//Double precision doesn't matter here since it's not used.
+		"__kernel void " << m_SumHistEntryPoint << "(__global real4_bucket* source, __global real4_bucket* dest, uint width, uint height, uint clear)\n"
+		"{\n"
+		"	if (GLOBAL_ID_X >= width || GLOBAL_ID_Y >= height)\n"
+		"		return;\n"
+		"\n"
+		"	dest[(GLOBAL_ID_Y * width) + GLOBAL_ID_X] += source[(GLOBAL_ID_Y * width) + GLOBAL_ID_X];\n"//Can't use INDEX_IN_GRID_2D here because the grid might be larger than the buffer to make even dimensions.
+		"\n"
+		"	if (clear)\n"
+		"		source[(GLOBAL_ID_Y * width) + GLOBAL_ID_X] = 0;\n"
+		"\n"
+		"	barrier(CLK_GLOBAL_MEM_FENCE);\n"//Just to be safe.
+		"}\n"
+		"\n";
+
+	return os.str();
+}
+
+/// <summary>
 /// Create the string for 3D projection based on the 3D values of the ember.
 /// Projection is done on the second point.
 /// If any of these fields toggle between 0 and nonzero between runs, a recompile is triggered.
@@ -743,7 +859,7 @@ string IterOpenCLKernelCreator<T>::CreateZeroizeKernelString()
 /// <param name="ember">The ember to create the projection string for</param>
 /// <returns>The kernel string</returns>
 template <typename T>
-string IterOpenCLKernelCreator<T>::CreateProjectionString(Ember<T>& ember)
+string IterOpenCLKernelCreator<T>::CreateProjectionString(const Ember<T>& ember) const
 {
 	size_t projBits = ember.ProjBits();
 	ostringstream os;

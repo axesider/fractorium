@@ -92,7 +92,7 @@ bool FractoriumEmberController<T>::FillPaletteTable(const string& s)
 		QTableWidget* paletteTable = m_Fractorium->ui.PaletteListTable;
 		QTableWidget* palettePreviewTable = m_Fractorium->ui.PalettePreviewTable;
 
-		m_CurrentPaletteFilePath = m_Fractorium->ui.PaletteFilenameCombo->property("path").toString().toStdString() + s;
+		m_CurrentPaletteFilePath = m_Fractorium->ui.PaletteFilenameCombo->property("path").toString().toStdString() + "/" + s;
 
 		if (size_t paletteSize = m_PaletteList.Size(m_CurrentPaletteFilePath))
 		{
@@ -162,11 +162,10 @@ void FractoriumEmberController<T>::ApplyPaletteToEmber()
 	double sat = double(m_Fractorium->m_PaletteSaturationSpin->value() / 100.0);
 	double brightness = double(m_Fractorium->m_PaletteBrightnessSpin->value() / 255.0);
 	double contrast = double(m_Fractorium->m_PaletteContrastSpin->value() > 0 ? (m_Fractorium->m_PaletteContrastSpin->value() * 2) : m_Fractorium->m_PaletteContrastSpin->value()) / 100.0;
-
-	m_Ember.m_Hue = double(m_Fractorium->m_PaletteHueSpin->value()) / 360.0;//This is the only palette adjustment value that gets saved with the ember, so just assign it here.
+	double hue = double(m_Fractorium->m_PaletteHueSpin->value()) / 360.0;
 	
 	//Use the temp palette as the base and apply the adjustments gotten from the GUI and save the result in the ember palette.
-	m_TempPalette.MakeAdjustedPalette(m_Ember.m_Palette, 0, m_Ember.m_Hue, sat, brightness, contrast, blur, freq);
+	m_TempPalette.MakeAdjustedPalette(m_Ember.m_Palette, 0, hue, sat, brightness, contrast, blur, freq);
 }
 
 /// <summary>
@@ -342,7 +341,7 @@ void Fractorium::OnPaletteFilterLineEditTextChanged(const QString& text)
 
 	table->setUpdatesEnabled(false);
 
-	for (uint i = 0; i < uint(table->rowCount()); i++)
+	for (int i = 0; i < table->rowCount(); i++)
 	{
 		if (auto item = table->item(i, 0))
 		{

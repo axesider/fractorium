@@ -79,7 +79,7 @@ void Fractorium::InitParamsUI()
 	SetupCombo(table, this, row, 1, m_TemporalFilterTypeCombo, comboVals, SIGNAL(currentIndexChanged(const QString&)), SLOT(OnTemporalFilterTypeComboCurrentIndexChanged(const QString&)));
 
 	SetupSpinner<DoubleSpinBox, double>(table, this, row, 1, m_DEFilterMinRadiusSpin, spinHeight,    0, 25,   1, SIGNAL(valueChanged(double)), SLOT(OnDEFilterMinRadiusWidthChanged(double)), true,   0,   0,   0);
-	SetupSpinner<DoubleSpinBox, double>(table, this, row, 1, m_DEFilterMaxRadiusSpin, spinHeight,    0, 25,   1, SIGNAL(valueChanged(double)), SLOT(OnDEFilterMaxRadiusWidthChanged(double)), true, 9.0, 9.0,   0);
+	SetupSpinner<DoubleSpinBox, double>(table, this, row, 1, m_DEFilterMaxRadiusSpin, spinHeight,    0, 25,   1, SIGNAL(valueChanged(double)), SLOT(OnDEFilterMaxRadiusWidthChanged(double)), true, 0.0, 9.0,   0);
 	SetupSpinner<DoubleSpinBox, double>(table, this, row, 1, m_DECurveSpin,			  spinHeight, 0.15,  5, 0.1, SIGNAL(valueChanged(double)), SLOT(OnDEFilterCurveWidthChanged(double)),     true, 0.4, 0.4, 0.4);
 
 	//Iteration.
@@ -89,7 +89,7 @@ void Fractorium::InitParamsUI()
 	SetupSpinner<SpinBox, int>(			table, this, row, 1, m_FuseSpin,			spinHeight, 1,      1000,   5, SIGNAL(valueChanged(int)),	 SLOT(OnFuseChanged(int)),			  true,	   15,	  15, 15);
 	SetupSpinner<DoubleSpinBox, double>(table, this, row, 1, m_QualitySpin,			spinHeight, 1,      dmax,  50, SIGNAL(valueChanged(double)), SLOT(OnQualityChanged(double)),	  true,    10,	  10, 10);
 	SetupSpinner<SpinBox, int>(         table, this, row, 1, m_SupersampleSpin,		spinHeight, 1,         4,   1, SIGNAL(valueChanged(int)),	 SLOT(OnSupersampleChanged(int)),	  true,     1,	   1,  1);
-	SetupSpinner<SpinBox, int>(         table, this, row, 1, m_TemporalSamplesSpin, spinHeight, 1,      5000,  50, SIGNAL(valueChanged(int)),	 SLOT(OnTemporalSamplesChanged(int)), true,  1000);
+	SetupSpinner<SpinBox, int>(         table, this, row, 1, m_TemporalSamplesSpin, spinHeight, 1,      5000,   1, SIGNAL(valueChanged(int)),	 SLOT(OnTemporalSamplesChanged(int)), true,  1000);
 
 	comboVals.clear();
 	comboVals.push_back("Step");
@@ -412,8 +412,8 @@ void Fractorium::OnFuseChanged(int d) { m_Controller->FuseChanged(d); }
 /// the rendering process is continued, else it's reset.
 /// </summary>
 /// <param name="d">The quality in terms of iterations per pixel</param>
-template <typename T> void FractoriumEmberController<T>::QualityChanged(double d) { Update([&] { m_Ember.m_Quality = d; }, true, d > m_Ember.m_Quality ? KEEP_ITERATING : FULL_RENDER); }
-void Fractorium::OnQualityChanged(double d) { m_Controller->QualityChanged(d); }
+template <typename T> void FractoriumEmberController<T>::QualityChanged(double d) { /*Update([&] { m_Ember.m_Quality = d; }, true, d > m_Ember.m_Quality ? KEEP_ITERATING : FULL_RENDER);*/ }
+void Fractorium::OnQualityChanged(double d) { /*m_Controller->QualityChanged(d);*/ }
 
 /// <summary>
 /// Set the supersample.
@@ -452,11 +452,11 @@ void FractoriumEmberController<T>::AffineInterpTypeChanged(int i)
 	Update([&]
 	{
 		if (i == 0)
-			m_Ember.m_AffineInterp = INTERP_LINEAR;
+			m_Ember.m_AffineInterp = AFFINE_INTERP_LINEAR;
 		else if (i == 1)
-			m_Ember.m_AffineInterp = INTERP_LOG;
+			m_Ember.m_AffineInterp = AFFINE_INTERP_LOG;
 		else
-			m_Ember.m_AffineInterp = INTERP_LINEAR;
+			m_Ember.m_AffineInterp = AFFINE_INTERP_LINEAR;
 	}, true, NOTHING);
 }
 
@@ -546,22 +546,28 @@ void FractoriumEmberController<T>::FillParamTablesAndPalette()
 	m_Fractorium->m_AffineInterpTypeCombo->SetCurrentIndexStealth(m_Ember.m_AffineInterp);
 	m_Fractorium->m_InterpTypeCombo->SetCurrentIndexStealth(m_Ember.m_Interp);
 
-	//Xaos.
-	FillXaos();
-
-	//Palette.
-	m_Fractorium->ResetPaletteControls();
-	m_Fractorium->m_PaletteHueSpin->SetValueStealth(NormalizeDeg180<double>(m_Ember.m_Hue * 360.0));//Convert -0.5 to 0.5 range to -180 - 180.
-
-	//Use the ember's embedded palette, rather than one from the list, so assign it directly to the controls without applying adjustments.
-	//Normally, the temp palette is assigned whenever the user clicks on a palette cell. But since that is skipped here, must do it manually.
+	//Palette related items:
+	//The temp palette is assigned the palette read when the file was parsed/saved. The user can apply adjustments on the GUI later.
+	//These adjustments will be applied to the temp palette, then assigned back to m_Ember.m_Palette.
+	//Normally, the temp palette is assigned whenever the user clicks on a palette cell. But since this is not
+	//called in response to that event, it is skipped here so must do it manually.
 	m_TempPalette = m_Ember.m_Palette;
-	auto temp = m_Ember.m_Palette.m_Filename;
+
+	//Palette controls are reset on each ember load. This means that if the palette was adjusted, saved, the selected ember
+	//changed to another, then back, the previously adjusted palette will now be considered the base, and all adjustments set to 0.
+	//To fix this, the caller must preserve the temp palette and the adjustment values and reassign. See Fractorium::CreateControllerFromOptions()
+	//for an example.
+	m_Fractorium->ResetPaletteControls();
 	
+	auto temp = m_Ember.m_Palette.m_Filename;
+
 	if (temp.get())
 		m_Fractorium->SetPaletteFileComboIndex(*temp.get());
 
-	UpdateAdjustedPaletteGUI(m_Ember.m_Palette);//Setting the palette will trigger a full render.
+	//Update the palette preview widget.
+	//Since the controls were cleared above, the adjusted palette will be identical to the base palette.
+	//Callers can set, apply and display palette adjustments after this function exits if needed.
+	UpdateAdjustedPaletteGUI(m_Ember.m_Palette);//Updating the palette GUI will trigger a full render.
 }
 
 /// <summary>

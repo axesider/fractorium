@@ -19,37 +19,35 @@ namespace EmberCLns
 /// Early clip/late clip
 /// Alpha channel, no alpha channel
 /// Alpha with/without transparency
-/// Template argument expected to be float or double.
 /// </summary>
-template <typename T>
 class EMBERCL_API FinalAccumOpenCLKernelCreator
 {
 public:
-	FinalAccumOpenCLKernelCreator();
+	FinalAccumOpenCLKernelCreator(bool doublePrecision);
 
-	string GammaCorrectionWithAlphaCalcKernel();
-	string GammaCorrectionWithAlphaCalcEntryPoint();
+	const string& GammaCorrectionWithAlphaCalcKernel() const;
+	const string& GammaCorrectionWithAlphaCalcEntryPoint() const;
 
-	string GammaCorrectionWithoutAlphaCalcKernel();
-	string GammaCorrectionWithoutAlphaCalcEntryPoint();
+	const string& GammaCorrectionWithoutAlphaCalcKernel() const;
+	const string& GammaCorrectionWithoutAlphaCalcEntryPoint() const;
 
-	string FinalAccumEarlyClipKernel();
-	string FinalAccumEarlyClipEntryPoint();
-	string FinalAccumEarlyClipWithAlphaCalcWithAlphaAccumKernel();
-	string FinalAccumEarlyClipWithAlphaCalcWithAlphaAccumEntryPoint();
-	string FinalAccumEarlyClipWithoutAlphaCalcWithAlphaAccumKernel();
-	string FinalAccumEarlyClipWithoutAlphaCalcWithAlphaAccumEntryPoint();
+	const string& FinalAccumEarlyClipKernel() const;
+	const string& FinalAccumEarlyClipEntryPoint() const;
+	const string& FinalAccumEarlyClipWithAlphaCalcWithAlphaAccumKernel() const;
+	const string& FinalAccumEarlyClipWithAlphaCalcWithAlphaAccumEntryPoint() const;
+	const string& FinalAccumEarlyClipWithoutAlphaCalcWithAlphaAccumKernel() const;
+	const string& FinalAccumEarlyClipWithoutAlphaCalcWithAlphaAccumEntryPoint() const;
 
-	string FinalAccumLateClipKernel();
-	string FinalAccumLateClipEntryPoint();
-	string FinalAccumLateClipWithAlphaCalcWithAlphaAccumKernel();
-	string FinalAccumLateClipWithAlphaCalcWithAlphaAccumEntryPoint();
-	string FinalAccumLateClipWithoutAlphaCalcWithAlphaAccumKernel();
-	string FinalAccumLateClipWithoutAlphaCalcWithAlphaAccumEntryPoint();
-	string GammaCorrectionEntryPoint(size_t channels, bool transparency);
-	string GammaCorrectionKernel(size_t channels, bool transparency);
-	string FinalAccumEntryPoint(bool earlyClip, size_t channels, bool transparency, T& alphaBase, T& alphaScale);
-	string FinalAccumKernel(bool earlyClip, size_t channels, bool transparency);
+	const string& FinalAccumLateClipKernel() const;
+	const string& FinalAccumLateClipEntryPoint() const;
+	const string& FinalAccumLateClipWithAlphaCalcWithAlphaAccumKernel() const;
+	const string& FinalAccumLateClipWithAlphaCalcWithAlphaAccumEntryPoint() const;
+	const string& FinalAccumLateClipWithoutAlphaCalcWithAlphaAccumKernel() const;
+	const string& FinalAccumLateClipWithoutAlphaCalcWithAlphaAccumEntryPoint() const;
+	const string& GammaCorrectionEntryPoint(size_t channels, bool transparency) const;
+	const string& GammaCorrectionKernel(size_t channels, bool transparency) const;
+	const string& FinalAccumEntryPoint(bool earlyClip, size_t channels, bool transparency, double& alphaBase, double& alphaScale) const;
+	const string& FinalAccumKernel(bool earlyClip, size_t channels, bool transparency) const;
 
 private:
 	string CreateFinalAccumKernelString(bool earlyClip, size_t channels, bool transparency);
@@ -58,6 +56,7 @@ private:
 	string CreateFinalAccumKernelString(bool earlyClip, bool alphaCalc, bool alphaAccum);
 	string CreateGammaCorrectionFunctionString(bool globalBucket, bool alphaCalc, bool alphaAccum, bool finalOut);
 	string CreateCalcNewRgbFunctionString(bool globalBucket);
+
 	string m_GammaCorrectionWithAlphaCalcKernel;
 	string m_GammaCorrectionWithAlphaCalcEntryPoint;
 
@@ -77,5 +76,8 @@ private:
 	string m_FinalAccumLateClipWithAlphaCalcWithAlphaAccumEntryPoint;
 	string m_FinalAccumLateClipWithoutAlphaCalcWithAlphaAccumKernel;//False, true.
 	string m_FinalAccumLateClipWithoutAlphaCalcWithAlphaAccumEntryPoint;
+
+	string m_Empty;
+	bool m_DoublePrecision;
 };
 }

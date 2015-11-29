@@ -15,9 +15,9 @@ namespace EmberCLns
 static const char* RgbToHsvFunctionString = 
 	//rgb 0 - 1,
 	//h 0 - 6, s 0 - 1, v 0 - 1
-	"static inline void RgbToHsv(real4* rgb, real4* hsv)\n"
+	"static inline void RgbToHsv(real4_bucket* rgb, real4_bucket* hsv)\n"
 	"{\n"
-	"	real_t max, min, del, rc, gc, bc;\n"
+	"	real_bucket_t max, min, del, rc, gc, bc;\n"
 	"\n"
 	//Compute maximum of r, g, b.
 	"	if ((*rgb).x >= (*rgb).y)\n"
@@ -85,10 +85,10 @@ static const char* RgbToHsvFunctionString =
 static const char* HsvToRgbFunctionString = 
 	//h 0 - 6, s 0 - 1, v 0 - 1
 	//rgb 0 - 1 
-	"static inline void HsvToRgb(real4* hsv, real4* rgb)\n"
+	"static inline void HsvToRgb(real4_bucket* hsv, real4_bucket* rgb)\n"
 	"{\n"
 	"	int j;\n"
-	"	real_t f, p, q, t;\n"
+	"	real_bucket_t f, p, q, t;\n"
 	"\n"
 	"	while ((*hsv).x >= 6)\n"
 	"		(*hsv).x = (*hsv).x - 6;\n"
@@ -119,9 +119,9 @@ static const char* HsvToRgbFunctionString =
 /// OpenCL equivalent of Palette::CalcAlpha().
 /// </summary>
 static const char* CalcAlphaFunctionString = 
-	"static inline real_t CalcAlpha(real_t density, real_t gamma, real_t linrange)\n"//Not the slightest clue what this is doing.//DOC
+	"static inline real_t CalcAlpha(real_bucket_t density, real_bucket_t gamma, real_bucket_t linrange)\n"//Not the slightest clue what this is doing.//DOC
 	"{\n"
-	"	real_t frac, alpha, funcval = pow(linrange, gamma);\n"
+	"	real_bucket_t frac, alpha, funcval = pow(linrange, gamma);\n"
 		"\n"
 	"	if (density > 0)\n"
 	"	{\n"
@@ -147,10 +147,10 @@ static const char* CalcAlphaFunctionString =
 /// during final accumulation, which only takes floats.
 /// </summary>
 static const char* CurveAdjustFunctionString =
-"static inline void CurveAdjust(__constant real4reals* csa, float* a, uint index)\n"
+"static inline void CurveAdjust(__constant real4reals_bucket* csa, float* a, uint index)\n"
 "{\n"
-"	uint tempIndex = (uint)Clamp(*a, 0.0, (float)COLORMAP_LENGTH_MINUS_1);\n"
-"	uint tempIndex2 = (uint)Clamp(csa[tempIndex].m_Real4.x, 0.0, (real_t)COLORMAP_LENGTH_MINUS_1);\n"
+"	uint tempIndex = (uint)clamp(*a, (float)0.0, (float)COLORMAP_LENGTH_MINUS_1);\n"
+"	uint tempIndex2 = (uint)clamp((float)csa[tempIndex].m_Real4.x, (float)0.0, (float)COLORMAP_LENGTH_MINUS_1);\n"
 "\n"
 "	*a = (float)round(csa[tempIndex2].m_Reals[index]);\n"
 "}\n";
@@ -195,135 +195,6 @@ static const char* RandFunctionString =
 	"\n";
 
 /// <summary>
-/// OpenCL equivalent of the global ClampRef().
-/// </summary>
-static const char* ClampRealFunctionString =
-	"inline real_t Clamp(real_t val, real_t min, real_t max)\n"
-	"{\n"
-	"	if (val < min)\n"
-	"		return min;\n"
-	"	else if (val > max)\n"
-	"		return max;\n"
-	"	else\n"
-	"		return val;\n"
-	"}\n"
-	"\n"
-	"inline void ClampRef(real_t* val, real_t min, real_t max)\n"
-	"{\n"
-	"	if (*val < min)\n"
-	"		*val = min;\n"
-	"	else if (*val > max)\n"
-	"		*val = max;\n"
-	"}\n"
-	"\n"
-	"inline real_t ClampGte(real_t val, real_t gte)\n"
-	"{\n"
-	"	return (val < gte) ? gte : val;\n"
-	"}\n"
-	"\n";
-
-/// <summary>
-/// OpenCL equivalent of the global LRint().
-/// </summary>
-static const char* InlineMathFunctionsString = 
-	"inline real_t LRint(real_t x)\n"
-	"{\n"
-	"    intPrec temp = (x >= 0.0 ? (intPrec)(x + 0.5) : (intPrec)(x - 0.5));\n"
-	"    return (real_t)temp;\n"
-	"}\n"
-	"\n"
-	"inline real_t Round(real_t r)\n"
-	"{\n"
-	"	return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);\n"
-	"}\n"
-	"\n"
-	"inline real_t Sign(real_t v)\n"
-	"{\n"
-	"	return (v < 0.0) ? -1 : (v > 0.0) ? 1 : 0.0;\n"
-	"}\n"
-	"\n"
-	"inline real_t SignNz(real_t v)\n"
-	"{\n"
-	"	return (v < 0.0) ? -1.0 : 1.0;\n"
-	"}\n"
-	"\n"
-	"inline real_t Sqr(real_t v)\n"
-	"{\n"
-	"	return v * v;\n"
-	"}\n"
-	"\n"
-	"inline real_t SafeSqrt(real_t x)\n"
-	"{\n"
-	"	if (x <= 0.0)\n"
-	"		return 0.0;\n"
-	"\n"
-	"	return sqrt(x);\n"
-	"}\n"
-	"\n"
-	"inline real_t Cube(real_t v)\n"
-	"{\n"
-	"	return v * v * v;\n"
-	"}\n"
-	"\n"
-	"inline real_t Hypot(real_t x, real_t y)\n"
-	"{\n"
-	"	return sqrt(SQR(x) + SQR(y));\n"
-	"}\n"
-	"\n"
-	"inline real_t Spread(real_t x, real_t y)\n"
-	"{\n"
-	"	return Hypot(x, y) * ((x) > 0.0 ? 1.0 : -1.0);\n"
-	"}\n"
-	"\n"
-	"inline real_t Powq4(real_t x, real_t y)\n"
-	"{\n"
-	"	return pow(fabs(x), y) * SignNz(x);\n"
-	"}\n"
-	"\n"
-	"inline real_t Powq4c(real_t x, real_t y)\n"
-	"{\n"
-	"	return y == 1.0 ? x : Powq4(x, y);\n"
-	"}\n"
-	"\n"
-	"inline real_t Zeps(real_t x)\n"
-	"{\n"
-	"	return x == 0.0 ? EPS : x;\n"
-	"}\n"
-	"\n"
-	"inline real_t Lerp(real_t a, real_t b, real_t p)\n"
-	"{\n"
-	"	return a + (b - a) * p;\n"
-	"}\n"
-	"\n"
-	"inline real_t Fabsmod(real_t v)\n"
-	"{\n"
-	"	real_t dummy;\n"
-	"\n"
-	"	return modf(v, &dummy);\n"
-	"}\n"
-	"\n"
-	"inline real_t Fosc(real_t p, real_t amp, real_t ph)\n"
-	"{\n"
-	"	return 0.5 - cos(p * amp + ph) * 0.5;\n"
-	"}\n"
-	"\n"
-	"inline real_t Foscn(real_t p, real_t ph)\n"
-	"{\n"
-	"	return 0.5 - cos(p + ph) * 0.5;\n"
-	"}\n"
-	"\n"
-	"inline real_t LogScale(real_t x)\n"
-	"{\n"
-	"	return x == 0.0 ? 0.0 : log((fabs(x) + 1) * M_E) * SignNz(x) / M_E;\n"
-	"}\n"
-	"\n"
-	"inline real_t LogMap(real_t x)\n"
-	"{\n"
-	"	return x == 0.0 ? 0.0 : (M_E + log(x * M_E)) * 0.25 * SignNz(x);\n"
-	"}\n"
-	"\n";
-
-/// <summary>
 /// OpenCL equivalent Renderer::AddToAccum().
 /// </summary>
 static const char* AddToAccumWithCheckFunctionString = 
@@ -351,26 +222,23 @@ static const char* CarToRasFunctionString =
 	"}\n"
 	"\n";
 
-static string AtomicString(bool doublePrecision, bool dp64AtomicSupport)
+static string AtomicString()
 {
 	ostringstream os;
 
-	//If they want single precision, or if they want double precision and have dp atomic support.
-	if (!doublePrecision || dp64AtomicSupport)
-	{
-		os <<
-		"void AtomicAdd(volatile __global real_t* source, const real_t operand)\n"
+	os <<
+		"void AtomicAdd(volatile __global real_bucket_t* source, const real_bucket_t operand)\n"
 		"{\n"
 		"	union\n"
 		"	{\n"
 		"		atomi intVal;\n"
-		"		real_t realVal;\n"
+		"		real_bucket_t realVal;\n"
 		"	} newVal;\n"
 		"\n"
 		"	union\n"
 		"	{\n"
 		"		atomi intVal;\n"
-		"		real_t realVal;\n"
+		"		real_bucket_t realVal;\n"
 		"	} prevVal;\n"
 		"\n"
 		"	do\n"
@@ -379,56 +247,7 @@ static string AtomicString(bool doublePrecision, bool dp64AtomicSupport)
 		"		newVal.realVal = prevVal.realVal + operand;\n"
 		"	} while (atomic_cmpxchg((volatile __global atomi*)source, prevVal.intVal, newVal.intVal) != prevVal.intVal);\n"
 		"}\n";
-	}
-	else//They want double precision and do not have dp atomic support.
-	{
-		os <<
-		"void AtomicAdd(volatile __global real_t* source, const real_t operand)\n"
-		"{\n"
-		"	union\n"
-		"	{\n"
-		"		uint intVal[2];\n"
-		"		real_t realVal;\n"
-		"	} newVal;\n"
-		"\n"
-		"	union\n"
-		"	{\n"
-		"		uint intVal[2];\n"
-		"		real_t realVal;\n"
-		"	} prevVal;\n"
-		"\n"
-		"	do\n"
-		"	{\n"
-		"		prevVal.realVal = *source;\n"
-		"		newVal.realVal = prevVal.realVal + operand;\n"
-		"	} while ((atomic_cmpxchg((volatile __global uint*)source, prevVal.intVal[0], newVal.intVal[0])     != prevVal.intVal[0]) ||\n"
-		"			 (atomic_cmpxchg((volatile __global uint*)source + 1, prevVal.intVal[1], newVal.intVal[1]) != prevVal.intVal[1]));\n"
-		"}\n";
-	}
 
 	return os.str();
 }
-
-#ifdef GRAVEYARD
-/*"void AtomicLocalAdd(volatile __local real_t* source, const real_t operand)\n"
-	"{\n"
-	"	union\n"
-	"	{\n"
-	"		atomi intVal;\n"
-	"		real_t realVal;\n"
-	"	} newVal;\n"
-	"\n"
-	"	union\n"
-	"	{\n"
-	"		atomi intVal;\n"
-	"		real_t realVal;\n"
-	"	} prevVal;\n"
-	"\n"
-	"	do\n"
-	"	{\n"
-	"		prevVal.realVal = *source;\n"
-	"		newVal.realVal = prevVal.realVal + operand;\n"
-	"	} while (atomic_cmpxchg((volatile __local atomi*)source, prevVal.intVal, newVal.intVal) != prevVal.intVal);\n"
-	"}\n"*/
-#endif
 }

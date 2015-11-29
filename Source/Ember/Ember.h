@@ -121,7 +121,6 @@ public:
 		m_CenterY			  = T(ember.m_CenterY);
 		m_RotCenterY		  = T(ember.m_RotCenterY);
 		m_Rotate			  = T(ember.m_Rotate);
-		m_Hue				  = T(ember.m_Hue);
 		m_Brightness		  = T(ember.m_Brightness);
 		m_Gamma				  = T(ember.m_Gamma);
 		m_Vibrancy			  = T(ember.m_Vibrancy);
@@ -181,7 +180,7 @@ public:
 		SetProjFunc();
 		ClearEdit();
 
-		if (ember.m_Edits != nullptr)
+		if (ember.m_Edits)
 			m_Edits = xmlCopyDoc(ember.m_Edits, 1);
 
 		CopyVec(m_EmberMotionElements, ember.m_EmberMotionElements);
@@ -202,7 +201,7 @@ public:
 		m_SubBatchSize = DEFAULT_SBS;
 		m_FuseCount = 15;
 		m_Supersample = 1;
-		m_TemporalSamples = 1000;
+		m_TemporalSamples = 100;
 		m_Symmetry = 0;
 		m_Quality = 100;
 		m_PixelsPerUnit = 240;
@@ -219,7 +218,6 @@ public:
 		m_CenterY = 0;
 		m_RotCenterY = 0;
 		m_Rotate = 0;
-		m_Hue = 0;
 		m_Brightness = 4;
 		m_Gamma = 4;
 		m_Vibrancy = 1;
@@ -228,7 +226,7 @@ public:
 		m_Time = 0;
 		m_Background.Reset();
 		m_Interp = EMBER_INTERP_LINEAR;
-		m_AffineInterp = INTERP_LOG;
+		m_AffineInterp = AFFINE_INTERP_LOG;
 
 		//DE filter.
 		m_MinRadDE = 0;
@@ -507,15 +505,15 @@ public:
 		}
 		else
 		{
-			m_CamMat[0][0] =  cos(-m_CamYaw);
-			m_CamMat[1][0] = -sin(-m_CamYaw);
+			m_CamMat[0][0] =  std::cos(-m_CamYaw);
+			m_CamMat[1][0] = -std::sin(-m_CamYaw);
 			m_CamMat[2][0] = 0;
-			m_CamMat[0][1] =  cos(m_CamPitch) * sin(-m_CamYaw);
-			m_CamMat[1][1] =  cos(m_CamPitch) * cos(-m_CamYaw);
-			m_CamMat[2][1] = -sin(m_CamPitch);
-			m_CamMat[0][2] =  sin(m_CamPitch) * sin(-m_CamYaw);
-			m_CamMat[1][2] =  sin(m_CamPitch) * cos(-m_CamYaw);
-			m_CamMat[2][2] =  cos(m_CamPitch);
+			m_CamMat[0][1] =  std::cos(m_CamPitch) * std::sin(-m_CamYaw);
+			m_CamMat[1][1] =  std::cos(m_CamPitch) * std::cos(-m_CamYaw);
+			m_CamMat[2][1] = -std::sin(m_CamPitch);
+			m_CamMat[0][2] =  std::sin(m_CamPitch) * std::sin(-m_CamYaw);
+			m_CamMat[1][2] =  std::sin(m_CamPitch) * std::cos(-m_CamYaw);
+			m_CamMat[2][2] =  std::cos(m_CamPitch);
 
 			if (projBits & PROJBITS_BLUR)
 			{
@@ -669,10 +667,10 @@ public:
 	}
 
 	/// <summary>
-	/// Flatten all xforms by adding a flatten variation if none is present, and if any of the
-	/// variations or parameters in the vector are present.
+	/// Flatten all xforms by adding a flatten variation if none is present, and if none of the
+	/// variations or parameters in the vector are not present.
 	/// </summary>
-	/// <param name="names">Vector of variation and parameter names</param>
+	/// <param name="names">Vector of variation and parameter names that inhibit flattening</param>
 	/// <returns>True if flatten was added to any of the xforms, false if it already was present or if none of the specified variations or parameters were present.</returns>
 	bool Flatten(vector<string>& names)
 	{
@@ -793,7 +791,6 @@ public:
 		InterpT<&Ember<T>::m_CenterY>(embers, coefs, size);
 		InterpT<&Ember<T>::m_RotCenterY>(embers, coefs, size);
 		InterpT<&Ember<T>::m_Rotate>(embers, coefs, size);
-		InterpT<&Ember<T>::m_Hue>(embers, coefs, size);
 		InterpT<&Ember<T>::m_Brightness>(embers, coefs, size);
 		InterpT<&Ember<T>::m_Gamma>(embers, coefs, size);
 		InterpT<&Ember<T>::m_Vibrancy>(embers, coefs, size);
@@ -861,7 +858,7 @@ public:
 
 				var->m_Weight = 0;
 
-				if (parVar != nullptr)
+				if (parVar)
 					parVar->Clear();
 
 				for (size_t k = 0; k < size; k++)//For each ember in the list.
@@ -872,17 +869,17 @@ public:
 					{
 						Variation<T>* tempVar = tempXform->GetVariationById(var->VariationId());//See if the variation at this xform index exists in that ember at this xform index.
 
-						if (tempVar != nullptr)
+						if (tempVar)
 						{
 							//Interp weight.
 							var->m_Weight += tempVar->m_Weight * coefs[k];
 
 							//If it was a parametric variation, interp params.
-							if (parVar != nullptr)
+							if (parVar)
 							{
 								ParametricVariation<T>* tempParVar = dynamic_cast<ParametricVariation<T>*>(tempVar);
 
-								if (tempParVar != nullptr && (parVar->ParamCount() == tempParVar->ParamCount()))//This check will should always be true, but just check to be absolutely sure to avoid clobbering memory.
+								if (tempParVar && (parVar->ParamCount() == tempParVar->ParamCount()))//This check will should always be true, but just check to be absolutely sure to avoid clobbering memory.
 								{
 									auto params = parVar->Params();
 									auto tempParams = tempParVar->Params();
@@ -910,7 +907,7 @@ public:
 			ClampRef<T>(thisXform->m_ColorSpeed, -1, 1);
 
 			//Interp affine and post.
-			if (m_AffineInterp == INTERP_LOG)
+			if (m_AffineInterp == AFFINE_INTERP_LOG)
 			{
 				vector<v2T> cxMag(size);
 				vector<v2T> cxAng(size);
@@ -947,7 +944,7 @@ public:
 					Interpolater<T>::InterpAndConvertBack(coefs, cxAng, cxMag, cxTrn, thisXform->m_Post);
 				}
 			}
-			else if (m_AffineInterp == INTERP_LINEAR)
+			else if (m_AffineInterp == AFFINE_INTERP_LINEAR)
 			{
 				//Interpolate pre and post affine using coefs.
 				allID = true;
@@ -1060,7 +1057,7 @@ public:
 				continue;
 
 			//Assume that if there are no variations, then it's a padding xform.
-			if (m_Xforms[i].Empty() && m_AffineInterp != INTERP_LOG)
+			if (m_Xforms[i].Empty() && m_AffineInterp != AFFINE_INTERP_LOG)
 				continue;
 
 			m_Xforms[i].m_Affine.Rotate(angle);
@@ -1078,14 +1075,15 @@ public:
 	/// </summary>
 	/// <param name="sym">The type of symmetry to add</param>
 	/// <param name="rand">The random context to use for generating random symmetry</param>
-	void AddSymmetry(int sym, QTIsaac<ISAAC_SIZE, ISAAC_INT>& rand)
+	void AddSymmetry(intmax_t sym, QTIsaac<ISAAC_SIZE, ISAAC_INT>& rand)
 	{
+		intmax_t k;
 		size_t i, result = 0;
 		T a;
 
 		if (sym == 0)
 		{
-			static int symDistrib[] = {
+			static intmax_t symDistrib[] = {
 				-4, -3,
 				-2, -2, -2,
 				-1, -1, -1,
@@ -1097,9 +1095,9 @@ public:
 			if (rand.Rand() & 1)
 				sym = symDistrib[rand.Rand() % Vlen(symDistrib)];
 			else if (rand.Rand() & 31)
-				sym = (rand.Rand() % 13) - 6;
+				sym = intmax_t(rand.Rand() % 13) - 6;
 			else
-				sym = (rand.Rand() % 51) - 25;
+				sym = intmax_t(rand.Rand() % 51) - 25;
 		}
 
 		if (sym == 1 || sym == 0)
@@ -1142,8 +1140,8 @@ public:
 			m_Xforms[i].m_ColorSpeed = 0;
 			m_Xforms[i].m_Animate = 0;
 			m_Xforms[i].m_ColorX = m_Xforms[i].m_ColorY = (sym < 3) ? 0 : (T(k - 1) / T(sym - 2));//Added Y.
-			m_Xforms[i].m_Affine.A(Round6(cos(k * a)));
-			m_Xforms[i].m_Affine.D(Round6(sin(k * a)));
+			m_Xforms[i].m_Affine.A(Round6(std::cos(k * a)));
+			m_Xforms[i].m_Affine.D(Round6(std::sin(k * a)));
 			m_Xforms[i].m_Affine.B(Round6(-m_Xforms[i].m_Affine.D()));
 			m_Xforms[i].m_Affine.E(m_Xforms[i].m_Affine.A());
 			m_Xforms[i].m_Affine.C(0);
@@ -1161,7 +1159,7 @@ public:
 	/// Return a uint with bits set to indicate which kind of projection should be done.
 	/// </summary>
 	/// <param name="onlyScaleIfNewIsSmaller">A uint with bits set for each kind of projection that is needed</param>
-	size_t ProjBits()
+	size_t ProjBits() const
 	{
 		size_t val = 0;
 
@@ -1335,9 +1333,6 @@ public:
 				case FLAME_MOTION_ROTATE:
 					APP_FMP(m_Rotate);
 					break;
-				case FLAME_MOTION_HUE:
-					APP_FMP(m_Hue);
-					break;
 				case FLAME_MOTION_BRIGHTNESS:
 					APP_FMP(m_Brightness);
 					break;
@@ -1362,9 +1357,10 @@ public:
 				case FLAME_MOTION_VIBRANCY:
 					APP_FMP(m_Vibrancy);
 					break;
+
                 case FLAME_MOTION_NONE:
                 default:
-                    break;
+					break;
 				}
 			}
 		}
@@ -1384,7 +1380,6 @@ public:
 		m_Vibrancy = 1;
 		m_Brightness = 4;
 		m_Symmetry = 0;
-		m_Hue = 0;
 		m_Rotate = 0;
 		m_PixelsPerUnit = 50;
 		m_Interp = EMBER_INTERP_LINEAR;
@@ -1416,9 +1411,9 @@ public:
 			m_MinRadDE = 0;
 			m_CurveDE = T(0.4);
 			m_GammaThresh = T(0.01);
-			m_TemporalSamples = 1000;
+			m_TemporalSamples = 100;
 			m_SpatialFilterType = GAUSSIAN_SPATIAL_FILTER;
-			m_AffineInterp = INTERP_LOG;
+			m_AffineInterp = AFFINE_INTERP_LOG;
 			m_TemporalFilterType = BOX_TEMPORAL_FILTER;
 			m_TemporalFilterWidth = 1;
 			m_TemporalFilterExp = 0;
@@ -1449,7 +1444,7 @@ public:
 			m_GammaThresh = -1;
 			m_TemporalSamples = 0;
 			m_SpatialFilterType = GAUSSIAN_SPATIAL_FILTER;
-			m_AffineInterp = INTERP_LOG;
+			m_AffineInterp = AFFINE_INTERP_LOG;
 			m_TemporalFilterType = BOX_TEMPORAL_FILTER;
 			m_TemporalFilterWidth = -1;
 			m_TemporalFilterExp = -999;
@@ -1467,7 +1462,7 @@ public:
 	/// </summary>
 	void ClearEdit()
 	{
-		if (m_Edits != nullptr)
+		if (m_Edits)
 			xmlFreeDoc(m_Edits);
 
 		m_Edits = nullptr;
@@ -1505,7 +1500,6 @@ public:
 		   << "CenterY: " << m_CenterY << endl
 		   << "RotCenterY: " << m_RotCenterY << endl
 		   << "Rotate: " << m_Rotate << endl
-		   << "Hue: " << m_Hue << endl
 		   << "Brightness: " << m_Brightness << endl
 		   << "Gamma: " << m_Gamma << endl
 		   << "Vibrancy: " << m_Vibrancy << endl
@@ -1592,7 +1586,7 @@ public:
 
 	//Whether or not any symmetry was added. This field is in a bit of a state of conflict right now as flam3 has a severe bug.
 	//Xml field: "symmetry".
-	int m_Symmetry;
+	intmax_t m_Symmetry;
 
 	//The number of iterations per pixel of the final output image. Note this is not affected by the increase in pixels in the
 	//histogram and DE filtering buffer due to supersampling. It can be affected by a non-zero zoom value though.
@@ -1648,11 +1642,6 @@ public:
 	//Rotate the camera by this many degrees. Since this is a camera rotation, the final output image will be rotated counter-clockwise.
 	//Xml field: "rotate".
 	T m_Rotate;
-
-	//When specifying the palette as an index in the palette file, rather than inserted in the Xml, it can optionally have its hue
-	//rotated by this amount.
-	//Xml field: "hue".
-	T m_Hue;
 
 	//Determine how bright to make the image during final accumulation.
 	//Xml field: "brightness".

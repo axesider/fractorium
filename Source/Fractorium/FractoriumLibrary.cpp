@@ -213,6 +213,12 @@ void FractoriumEmberController<T>::EmberTreeItemChanged(QTreeWidgetItem* item, i
 	
 		if (emberItem)
 		{
+			if (emberItem->text(0).isEmpty())//Prevent empty string.
+			{
+				emberItem->UpdateEditText();
+				return;
+			}
+
 			string oldName = emberItem->GetEmber()->m_Name;//First preserve the previous name.
 
 			tree->blockSignals(true);
@@ -228,7 +234,6 @@ void FractoriumEmberController<T>::EmberTreeItemChanged(QTreeWidgetItem* item, i
 			}
 
 			tree->blockSignals(false);
-			FillSummary();
 		}
 		else if (auto parentItem = dynamic_cast<QTreeWidgetItem*>(item))
 		{
@@ -241,7 +246,7 @@ void FractoriumEmberController<T>::EmberTreeItemChanged(QTreeWidgetItem* item, i
 			}
 		}
 	}
-	catch(std::exception& e)
+	catch(const std::exception& e)
 	{
 		qDebug() << "FractoriumEmberController<T>::EmberTreeItemChanged() : Exception thrown: " << e.what();
 	}
@@ -254,6 +259,8 @@ void Fractorium::OnEmberTreeItemChanged(QTreeWidgetItem* item, int col) { m_Cont
 /// Clears the undo state.
 /// Resets the rendering process.
 /// Called when the user double clicks on a library tree item.
+/// This will get called twice for some reason, and there's no way to prevent it.
+/// Doesn't seem to cause any problems.
 /// </summary>
 /// <param name="item">The item double clicked on</param>
 /// <param name="col">The column clicked, ignored.</param>

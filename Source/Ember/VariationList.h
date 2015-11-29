@@ -5,6 +5,7 @@
 #include "Variations03.h"
 #include "Variations04.h"
 #include "Variations05.h"
+#include "Variations06.h"
 #include "VariationsDC.h"
 
 /// <summary>
@@ -35,7 +36,7 @@ public:
 	/// </summary>
 	VariationList()
 	{
-		m_Variations.reserve(900);//Change this as the list grows.
+		m_Variations.reserve(eVariationId::LAST_VAR);
 		ADDPREPOSTREGVAR(Linear)
 		ADDPREPOSTREGVAR(Sinusoidal)
 		ADDPREPOSTREGVAR(Spherical)
@@ -315,6 +316,8 @@ public:
 		ADDPREPOSTREGVAR(Ho)
 		ADDPREPOSTREGVAR(Julia3Dq)
 		ADDPREPOSTREGVAR(Line)
+		ADDPREPOSTREGVAR(Loonie2)
+		ADDPREPOSTREGVAR(Loonie3)
 		ADDPREPOSTREGVAR(Loonie3D)
 		ADDPREPOSTREGVAR(Mcarpet)
 		ADDPREPOSTREGVAR(Waves23D)
@@ -329,16 +332,25 @@ public:
 		ADDPREPOSTREGVAR(Falloff2)
 		ADDPREPOSTREGVAR(Falloff3)
 		ADDPREPOSTREGVAR(Xtrb)
+		ADDPREPOSTREGVAR(Hexaplay3D)
+		ADDPREPOSTREGVAR(Hexnix3D)
+		ADDPREPOSTREGVAR(Hexcrop)
+		ADDPREPOSTREGVAR(Hexes)
+		ADDPREPOSTREGVAR(Nblur)
+		ADDPREPOSTREGVAR(Octapol)
+		ADDPREPOSTREGVAR(Crob)
+		ADDPREPOSTREGVAR(BubbleT3D)
+		ADDPREPOSTREGVAR(Synth)
 		//ADDPREPOSTREGVAR(LinearXZ)
 		//ADDPREPOSTREGVAR(LinearYZ)
 
 		//DC are special.
-		m_Variations.push_back(new DCBubbleVariation<T>());
+		ADDPREPOSTREGVAR(DCBubble)
 		ADDPREPOSTREGVAR(DCCarpet)
 		ADDPREPOSTREGVAR(DCCube)
-		m_Variations.push_back(new DCCylinderVariation<T>());
+		ADDPREPOSTREGVAR(DCCylinder)
 		ADDPREPOSTREGVAR(DCGridOut)
-		m_Variations.push_back(new DCLinearVariation<T>());
+		ADDPREPOSTREGVAR(DCLinear)
 		ADDPREPOSTREGVAR(DCTriangle)
 		ADDPREPOSTREGVAR(DCZTransl)
 
@@ -348,6 +360,7 @@ public:
 		m_RegVariations.reserve(m_Variations.size()  / 3);
 		m_PreVariations.reserve(m_Variations.size()  / 3);
 		m_PostVariations.reserve(m_Variations.size() / 3);
+		m_ParametricVariations.reserve(size_t(m_Variations.size() * .90));//This is a rough guess at how many are parametric.
 
 		for (auto var : m_Variations) if (var->VarType() == VARTYPE_REG)  m_RegVariations.push_back(var);
 		for (auto var : m_Variations) if (var->VarType() == VARTYPE_PRE)  m_PreVariations.push_back(var);
@@ -355,7 +368,7 @@ public:
 
 		//Keep a list of which variations derive from ParametricVariation.
 		//Note that these are not new copies, rather just pointers to the original instances in m_Variations.
-		for (uint i = 0; i < m_Variations.size(); i++)
+		for (size_t i = 0; i < m_Variations.size(); i++)
 		{
 			if (ParametricVariation<T>* parVar = dynamic_cast<ParametricVariation<T>*>(m_Variations[i]))
 				m_ParametricVariations.push_back(parVar);
@@ -412,7 +425,7 @@ public:
 	/// <returns>A pointer to the variation if found, else nullptr.</returns>
 	const Variation<T>* GetVariation(eVariationId id) const
 	{
-		for (uint i = 0; i < m_Variations.size() && m_Variations[i] != nullptr; i++)
+		for (size_t i = 0; i < m_Variations.size() && m_Variations[i]; i++)
 			if (id == m_Variations[i]->VariationId())
 				return m_Variations[i];
 
@@ -435,7 +448,7 @@ public:
 	/// <returns>A pointer to the variation if found, else nullptr.</returns>
 	const Variation<T>* GetVariation(const string& name) const
 	{
-		for (uint i = 0; i < m_Variations.size() && m_Variations[i] != nullptr; i++)
+		for (size_t i = 0; i < m_Variations.size() && m_Variations[i]; i++)
 			if (!_stricmp(name.c_str(), m_Variations[i]->Name().c_str()))
 				return m_Variations[i];
 
@@ -466,7 +479,7 @@ public:
 	/// <returns>The parametric variation with a matching name, else nullptr.</returns>
 	const ParametricVariation<T>* GetParametricVariation(const string& name) const
 	{
-		for (uint i = 0; i < m_ParametricVariations.size() && m_ParametricVariations[i] != nullptr; i++)
+		for (size_t i = 0; i < m_ParametricVariations.size() && m_ParametricVariations[i]; i++)
 			if (!_stricmp(name.c_str(), m_ParametricVariations[i]->Name().c_str()))
 				return m_ParametricVariations[i];
 
@@ -480,9 +493,9 @@ public:
 	/// <returns>The index of the variation with the matching name, else -1</returns>
 	int GetVariationIndex(const string& name)
 	{
-		for (uint i = 0; i < m_Variations.size() && m_Variations[i] != nullptr; i++)
+		for (size_t i = 0; i < m_Variations.size() && m_Variations[i]; i++)
 			if (!_stricmp(name.c_str(), m_Variations[i]->Name().c_str()))
-				return i;
+				return int(i);
 
 		return -1;
 	}

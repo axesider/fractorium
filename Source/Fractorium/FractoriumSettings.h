@@ -13,13 +13,13 @@
 #define DOUBLEPRECISION		 "render/dp64"
 #define CONTUPDATE			 "render/continuousupdate"
 #define SHOWALLXFORMS	     "render/dragshowallxforms"
-#define PLATFORMINDEX        "render/platformindex"
-#define DEVICEINDEX          "render/deviceindex"
+#define DEVICES				 "render/devices"
 #define THREADCOUNT          "render/threadcount"
 #define CPUDEFILTER			 "render/cpudefilter"
 #define OPENCLDEFILTER       "render/opencldefilter"
 #define CPUSUBBATCH		     "render/cpusubbatch"
 #define OPENCLSUBBATCH	     "render/openclsubbatch"
+#define RANDOMCOUNT			 "render/randomcount"
 
 #define FINALEARLYCLIP       "finalrender/earlyclip"
 #define FINALYAXISUP         "finalrender/finalyaxisup"
@@ -32,8 +32,7 @@
 #define FINALKEEPASPECT		 "finalrender/keepaspect"
 #define FINALSCALE			 "finalrender/scale"
 #define FINALEXT			 "finalrender/ext"
-#define FINALPLATFORMINDEX   "finalrender/platformindex"
-#define FINALDEVICEINDEX     "finalrender/deviceindex"
+#define FINALDEVICES		 "finalrender/devices"
 #define FINALTHREADCOUNT     "finalrender/threadcount"
 #define FINALTHREADPRIORITY  "finalrender/threadpriority"
 #define FINALQUALITY	     "finalrender/quality"
@@ -61,6 +60,8 @@
 #define IDENTITYNICK		 "identity/nick"
 
 #define UIVARIATIONS		 "ui/variations"
+
+#define STYLETHEME			 "style/theme"
 
 /// <summary>
 /// Class for preserving various program options between
@@ -95,14 +96,11 @@ public:
 	bool ContinuousUpdate();
 	void ContinuousUpdate(bool b);
 
-	uint PlatformIndex();
-	void PlatformIndex(uint b);
-
-	uint DeviceIndex();
-	void DeviceIndex(uint b);
+	QList<QVariant> Devices();
+	void Devices(const QList<QVariant>& devices);
 
 	uint ThreadCount();
-	void ThreadCount(uint b);
+	void ThreadCount(uint i);
 
 	bool CpuDEFilter();
 	void CpuDEFilter(bool b);
@@ -111,11 +109,14 @@ public:
 	void OpenCLDEFilter(bool b);
 
 	uint CpuSubBatch();
-	void CpuSubBatch(uint b);
+	void CpuSubBatch(uint i);
 
 	uint OpenCLSubBatch();
-	void OpenCLSubBatch(uint b);
+	void OpenCLSubBatch(uint i);
 	
+	uint RandomCount();
+	void RandomCount(uint i);
+
 	bool FinalEarlyClip();
 	void FinalEarlyClip(bool b);
 	
@@ -149,16 +150,13 @@ public:
 	QString FinalExt();
 	void FinalExt(const QString& s);
 
-	uint FinalPlatformIndex();
-	void FinalPlatformIndex(uint b);
-
-	uint FinalDeviceIndex();
-	void FinalDeviceIndex(uint b);
+	QList<QVariant> FinalDevices();
+	void FinalDevices(const QList<QVariant>& devices);
 
 	uint FinalThreadCount();
-	void FinalThreadCount(uint b);
+	void FinalThreadCount(uint i);
 
-	uint FinalThreadPriority();
+	int FinalThreadPriority();
 	void FinalThreadPriority(int b);
 
 	uint FinalQuality();
@@ -214,4 +212,7 @@ public:
 
 	QMap<QString, QVariant> Variations();
 	void Variations(const QMap<QString, QVariant>& m);
+
+	QString Theme();
+	void Theme(const QString& s);
 };

@@ -19,6 +19,7 @@
 /// </summary>
 
 class GLWidget;
+class QssDialog;
 class FractoriumOptionsDialog;
 class FractoriumVariationsDialog;
 class FractoriumFinalRenderDialog;
@@ -42,9 +43,9 @@ template <typename T> class FinalRenderEmberController;
 /// certain parameters don't require a full render, the minimum necessary processing will be ran.
 /// When the user changes something on the GUI, the required processing action is added to a vector.
 /// Upon the next execution of the idle timer function, the most significant action will be extracted
-/// and applied to the renderer. The vector is then cleared.
+/// and applied to the renderer. The state change vector is then cleared.
 /// On the left side of the window is a dock widget which contains all controls needed for
-/// manipulating embers.
+/// manipulating embers. It's tabs can be floated, dragged, docked and nested elsewhere.
 /// Qt takes very long to create file dialog windows, so they are kept as members and initialized
 /// upon first use with lazy instantiation and then kept around for the remainder of the program.
 /// Additional dialogs are for the about box, options, and final rendering out to a file.
@@ -53,9 +54,6 @@ template <typename T> class FinalRenderEmberController;
 /// Fractorium.cpp and the other functional areas are each broken out into their own files.
 /// The order of the functions in each .cpp file should roughly match the order they appear in the .h file.
 /// Future todo list:
-///		Add all of the plugins/variations that work with Apophysis and are open source.
-///		Allow specifying variations to include/exclude from random generation.
-///		Allow the option to specify a different palette file rather than the default flam3-palettes.xml.
 ///		Implement more rendering types.
 ///		Add support for animation previewing.
 ///		Add support for full animation editing and rendering.
@@ -66,6 +64,7 @@ class Fractorium : public QMainWindow
 	Q_OBJECT
 
 	friend GLWidget;
+	friend QssDialog;
 	friend FractoriumOptionsDialog;
 	friend FractoriumFinalRenderDialog;
 	friend FractoriumAboutDialog;
@@ -145,6 +144,11 @@ public slots:
 	void OnActionAbout(bool checked);//Help.
 
 	//Toolbar.
+	void OnActionCpu(bool checked);
+	void OnActionCL(bool checked);
+	void OnActionSP(bool checked);
+	void OnActionDP(bool checked);
+	void OnActionStyle(bool checked);
 
 	//Library.
 	void OnEmberTreeItemChanged(QTreeWidgetItem* item, int col);
@@ -302,6 +306,7 @@ protected:
 	virtual void dragEnterEvent(QDragEnterEvent* e) override;
 	virtual void dragMoveEvent(QDragMoveEvent* e) override;
 	virtual void dropEvent(QDropEvent* e) override;
+	virtual void showEvent(QShowEvent *e) override;
 
 private:
 	void InitMenusUI();
@@ -323,6 +328,9 @@ private:
 
 	//Embers.
 	bool HaveFinal();
+
+	//Toolbar.
+	void SyncOptionsToToolbar();
 
 	//Library.
 	pair<size_t, QTreeWidgetItem*> GetCurrentEmberIndex();
@@ -358,9 +366,10 @@ private:
 	void SetTableWidgetBackgroundColor();
 
 	//Rendering/progress.
+	void ShutdownAndRecreateFromOptions();
 	bool CreateRendererFromOptions();
 	bool CreateControllerFromOptions();
-	
+
 	//Dialogs.
 	QStringList SetupOpenXmlDialog();
 	QString SetupSaveXmlDialog(const QString& defaultFilename);
@@ -463,8 +472,12 @@ private:
 	//Files.
 	QFileDialog* m_FileDialog;
 	QFileDialog* m_FolderDialog;
+	QssDialog* m_QssDialog;
 	QString m_LastSaveAll;
 	QString m_LastSaveCurrent;
+	QString m_Style;
+	QStyle* m_Theme;
+	QString m_SettingsPath;
 	//QMenu* m_FileTreeMenu;
 
 	QProgressBar* m_ProgressBar;
@@ -486,7 +499,7 @@ private:
 	int m_VarSortMode;
 	int m_PaletteSortMode;
 	int m_PreviousPaletteRow;
-	OpenCLWrapper m_Wrapper;
+	OpenCLInfo& m_Info;
 	unique_ptr<FractoriumEmberControllerBase> m_Controller;
 	Ui::FractoriumClass ui;
 };

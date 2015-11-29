@@ -11,19 +11,17 @@
 /// </summary>
 /// <param name="fractorium">Pointer to the main window.</param>
 FractoriumEmberControllerBase::FractoriumEmberControllerBase(Fractorium* fractorium)
+	: m_Info(OpenCLInfo::Instance())
 {
 	Timing t;
 
 	m_Rendering = false;
 	m_Shared = true;
-	m_Platform = 0;
-	m_Device = 0;
 	m_FailedRenders = 0;
 	m_UndoIndex = 0;
 	m_RenderType = CPU_RENDERER;
 	m_OutputTexID = 0;
 	m_SubBatchCount = 1;//Will be ovewritten by the options on first render.
-	m_FinalImageIndex = 0;
 	m_Fractorium = fractorium;
 	m_RenderTimer = nullptr;
 	m_RenderRestartTimer = nullptr;
@@ -72,12 +70,14 @@ FractoriumEmberController<T>::FractoriumEmberController(Fractorium* fractorium)
 {
 	m_PreviewRun = false;
 	m_PreviewRunning = false;
-	m_SheepTools = unique_ptr<SheepTools<T, T>>(new SheepTools<T, T>("flam3-palettes.xml", new EmberNs::Renderer<T, T>()));
+	m_SheepTools = unique_ptr<SheepTools<T, float>>(new SheepTools<T, float>(
+													QString(QApplication::applicationDirPath() + "flam3-palettes.xml").toLocal8Bit().data(),
+													new EmberNs::Renderer<T, float>()));
 	m_GLController = unique_ptr<GLEmberController<T>>(new GLEmberController<T>(fractorium, fractorium->ui.GLDisplay, this));
-	m_PreviewRenderer = unique_ptr<EmberNs::Renderer<T, T>>(new EmberNs::Renderer<T, T>());
+	m_PreviewRenderer = unique_ptr<EmberNs::Renderer<T, float>>(new EmberNs::Renderer<T, float>());
 
 	//Initial combo change event to fill the palette table will be called automatically later.
-	if (!InitPaletteList("./"))
+	if (!InitPaletteList(QCoreApplication::applicationDirPath().toLocal8Bit().data()))
 		throw "No palettes found, exiting.";
 
 	BackgroundChanged(QColor(0, 0, 0));//Default to black.
@@ -217,7 +217,6 @@ template <typename T>
 void FractoriumEmberController<T>::Update(std::function<void (void)> func, bool updateRender, eProcessAction action)
 {
 	func();
-	FillSummary();
 
 	if (updateRender)
 		UpdateRender(action);
@@ -294,8 +293,6 @@ void FractoriumEmberController<T>::UpdateXform(std::function<void(Xform<T>*)> fu
 
 		break;
 	}
-
-	FillSummary();
 
 	if (updateRender)
 		UpdateRender(action);

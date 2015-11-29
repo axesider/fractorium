@@ -8,12 +8,10 @@
 /// </summary>
 /// <param name="opt">A populated EmberOptions object which specifies all program options to be used</param>
 /// <returns>True if success, else false.</returns>
-template <typename T, typename bucketT>
+template <typename T>
 bool EmberRender(EmberOptions& opt)
 {
-#ifdef USECL
-	OpenCLWrapper wrapper;
-#endif
+#ifdef USECL	EmberCLns::OpenCLInfo& info(EmberCLns::OpenCLInfo::Instance());#endif
 	std::cout.imbue(std::locale(""));
 
 	if (opt.DumpArgs())
@@ -22,7 +20,7 @@ bool EmberRender(EmberOptions& opt)
 	if (opt.OpenCLInfo())
 	{
 		cout << "\nOpenCL Info: " << endl;
-		cout << wrapper.DumpInfo();
+		cout << info.DumpInfo();
 		return true;
 	}
 
@@ -45,8 +43,9 @@ bool EmberRender(EmberOptions& opt)
 	XmlToEmber<T> parser;
 	EmberToXml<T> emberToXml;
 	vector<QTIsaac<ISAAC_SIZE, ISAAC_INT>> randVec;
+	const vector<pair<size_t, size_t>> devices = Devices(opt.Devices());
 	unique_ptr<RenderProgress<T>> progress(new RenderProgress<T>());
-	unique_ptr<Renderer<T, bucketT>> renderer(CreateRenderer<T, bucketT>(opt.EmberCL() ? OPENCL_RENDERER : CPU_RENDERER, opt.Platform(), opt.Device(), false, 0, emberReport));
+	unique_ptr<Renderer<T, float>> renderer(CreateRenderer<T>(opt.EmberCL() ? OPENCL_RENDERER : CPU_RENDERER, devices, false, 0, emberReport));
 	vector<string> errorReport = emberReport.ErrorReport();
 
 	if (!errorReport.empty())
@@ -87,8 +86,11 @@ bool EmberRender(EmberOptions& opt)
 
 		if (opt.Verbose())
 		{
-			cout << "Platform: " << wrapper.PlatformName(opt.Platform()) << endl;
-			cout << "Device: " << wrapper.DeviceName(opt.Platform(), opt.Device()) << endl;
+			for (auto& device : devices)
+			{
+				cout << "Platform: " << info.PlatformName(device.first) << endl;
+				cout << "Device: " << info.DeviceName(device.first, device.second) << endl;
+			}
 		}
 
 		if (opt.ThreadCount() > 1)
@@ -146,7 +148,7 @@ bool EmberRender(EmberOptions& opt)
 
 	//Final setup steps before running.
 	os.imbue(std::locale(""));
-	padding = uint(log10((double)embers.size())) + 1;
+	padding = uint(std::log10(double(embers.size()))) + 1;
 	renderer->EarlyClip(opt.EarlyClip());
 	renderer->YAxisUp(opt.YAxisUp());
 	renderer->LockAccum(opt.LockAccum());
@@ -155,7 +157,7 @@ bool EmberRender(EmberOptions& opt)
 	renderer->Transparency(opt.Transparency());
 	renderer->NumChannels(channels);
 	renderer->BytesPerChannel(opt.BitsPerChannel() / 8);
-	renderer->Priority((eThreadPriority)Clamp<int>((int)eThreadPriority::LOWEST, (int)eThreadPriority::HIGHEST, opt.Priority()));
+	renderer->Priority(eThreadPriority(Clamp<intmax_t>(intmax_t(opt.Priority()), intmax_t(eThreadPriority::LOWEST), intmax_t(eThreadPriority::HIGHEST))));
 	renderer->Callback(opt.DoProgress() ? progress.get() : nullptr);
 
 	for (i = 0; i < embers.size(); i++)
@@ -173,8 +175,8 @@ bool EmberRender(EmberOptions& opt)
 
 		embers[i].m_TemporalSamples = 1;//Force temporal samples to 1 for render.
 		embers[i].m_Quality *= T(opt.QualityScale());
-		embers[i].m_FinalRasW = uint(T(embers[i].m_FinalRasW) * opt.SizeScale());
-		embers[i].m_FinalRasH = uint(T(embers[i].m_FinalRasH) * opt.SizeScale());
+		embers[i].m_FinalRasW = size_t(T(embers[i].m_FinalRasW) * opt.SizeScale());
+		embers[i].m_FinalRasH = size_t(T(embers[i].m_FinalRasH) * opt.SizeScale());
 		embers[i].m_PixelsPerUnit *= T(opt.SizeScale());
 
 		if (embers[i].m_FinalRasW == 0 || embers[i].m_FinalRasH == 0)
@@ -277,7 +279,7 @@ bool EmberRender(EmberOptions& opt)
 			os << comments.m_NumIters << " / " << iterCount << " (" << std::fixed << std::setprecision(2) << ((double(stats.m_Iters) / double(iterCount)) * 100) << "%)";
 
 			VerbosePrint("\nIters ran/requested: " + os.str());
-			VerbosePrint("Bad values: " << stats.m_Badvals);
+			if (!opt.EmberCL()) VerbosePrint("Bad values: " << stats.m_Badvals);
 			VerbosePrint("Render time: " + t.Format(stats.m_RenderMs));
 			VerbosePrint("Pure iter time: " + t.Format(stats.m_IterMs));
 			VerbosePrint("Iters/sec: " << size_t(stats.m_Iters / (stats.m_IterMs / 1000.0)) << endl);
@@ -292,7 +294,7 @@ bool EmberRender(EmberOptions& opt)
 			if (opt.Format() == "png")
 				writeSuccess = WritePng(filename.c_str(), finalImagep, finalEmber.m_FinalRasW, finalEmber.m_FinalRasH, opt.BitsPerChannel() / 8, opt.PngComments(), comments, opt.Id(), opt.Url(), opt.Nick());
 			else if (opt.Format() == "jpg")
-				writeSuccess = WriteJpeg(filename.c_str(), finalImagep, finalEmber.m_FinalRasW, finalEmber.m_FinalRasH, opt.JpegQuality(), opt.JpegComments(), comments, opt.Id(), opt.Url(), opt.Nick());
+				writeSuccess = WriteJpeg(filename.c_str(), finalImagep, finalEmber.m_FinalRasW, finalEmber.m_FinalRasH, int(opt.JpegQuality()), opt.JpegComments(), comments, opt.Id(), opt.Url(), opt.Nick());
 			else if (opt.Format() == "ppm")
 				writeSuccess = WritePpm(filename.c_str(), finalImagep, finalEmber.m_FinalRasW, finalEmber.m_FinalRasH);
 			else if (opt.Format() == "bmp")
@@ -303,13 +305,22 @@ bool EmberRender(EmberOptions& opt)
 		});
 
 		if (opt.EmberCL() && opt.DumpKernel())
-			cout << "Iteration kernel: \n" << reinterpret_cast<RendererCL<T>*>(renderer.get())->IterKernel() << endl;
+		{
+			if (auto rendererCL = dynamic_cast<RendererCL<T, float>*>(renderer.get()))
+			{
+				cout << "Iteration kernel:\n" <<
+				rendererCL->IterKernel() << "\n\n" <<
+				"Density filter kernel:\n" <<
+				rendererCL->DEKernel() << "\n\n" <<
+				"Final accumulation kernel:\n" <<
+				rendererCL->FinalAccumKernel() << endl;
+			}
+		}
 
 		VerbosePrint("Done.");
 	}
 
-	if (opt.Verbose())
-		t.Toc("\nTotal time: ", true);
+	t.Toc("\nFinished in: ", true);
 
 	return true;
 }
@@ -340,18 +351,18 @@ int _tmain(int argc, _TCHAR* argv[])
 #ifdef DO_DOUBLE
 		if (opt.Bits() == 64)
 		{
-			b = EmberRender<double, double>(opt);
+			b = EmberRender<double>(opt);
 		}
 		else
 #endif
 		if (opt.Bits() == 33)
 		{
-			b = EmberRender<float, float>(opt);
+			b = EmberRender<float>(opt);
 		}
 		else if (opt.Bits() == 32)
 		{
 			cout << "Bits 32/int histogram no longer supported. Using bits == 33 (float)." << endl;
-			b = EmberRender<float, float>(opt);
+			b = EmberRender<float>(opt);
 		}
 	}
 

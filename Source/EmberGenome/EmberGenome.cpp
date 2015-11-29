@@ -1,4 +1,5 @@
 #include "EmberCommonPch.h"
+
 #include "EmberGenome.h"
 #include "JpegUtils.h"
 
@@ -39,12 +40,10 @@ void SetDefaultTestValues(Ember<T>& ember)
 /// </summary>
 /// <param name="opt">A populated EmberOptions object which specifies all program options to be used</param>
 /// <returns>True if success, else false.</returns>
-template <typename T, typename bucketT>
+template <typename T>
 bool EmberGenome(EmberOptions& opt)
 {
-#ifdef USECL
-	OpenCLWrapper wrapper;
-#endif
+#ifdef USECL	OpenCLInfo& info(OpenCLInfo::Instance());#endif
 	std::cout.imbue(std::locale(""));
 
 	if (opt.DumpArgs())
@@ -54,7 +53,7 @@ bool EmberGenome(EmberOptions& opt)
 	{
 #ifdef USECL
 		cerr << "\nOpenCL Info: " << endl;
-		cerr << wrapper.DumpInfo();
+		cerr << info.DumpInfo();
 #endif
 		return true;
 	}
@@ -62,8 +61,8 @@ bool EmberGenome(EmberOptions& opt)
 	//Regular variables.
 	Timing t;
 	bool exactTimeMatch, randomMode, didColor, seqFlag;
-	uint i, j, i0, i1, rep, val, frame, frameCount, count = 0;
-	uint ftime, firstFrame, lastFrame;
+	size_t i, j, i0, i1, rep, val, frame, frameCount, count = 0;
+	size_t ftime, firstFrame, lastFrame;
 	size_t n, tot, totb, totw;
 	T avgPix, fractionBlack, fractionWhite, blend, spread, mix0, mix1;
 	string token, filename;
@@ -80,8 +79,9 @@ bool EmberGenome(EmberOptions& opt)
 	EmberToXml<T> emberToXml;
 	VariationList<T> varList;
 	EmberReport emberReport, emberReport2;
+	const vector<pair<size_t, size_t>> devices = Devices(opt.Devices());
 	unique_ptr<RenderProgress<T>> progress(new RenderProgress<T>());
-	unique_ptr<Renderer<T, bucketT>> renderer(CreateRenderer<T, bucketT>(opt.EmberCL() ? OPENCL_RENDERER : CPU_RENDERER, opt.Platform(), opt.Device(), false, 0, emberReport));
+	unique_ptr<Renderer<T, float>> renderer(CreateRenderer<T>(opt.EmberCL() ? OPENCL_RENDERER : CPU_RENDERER, devices, false, 0, emberReport));
 	QTIsaac<ISAAC_SIZE, ISAAC_INT> rand(ISAAC_INT(t.Tic()), ISAAC_INT(t.Tic() * 2), ISAAC_INT(t.Tic() * 3));
 	vector<string> errorReport = emberReport.ErrorReport();
 
@@ -107,8 +107,11 @@ bool EmberGenome(EmberOptions& opt)
 
 		if (opt.Verbose())
 		{
-			cerr << "Platform: " << wrapper.PlatformName(opt.Platform()) << endl;
-			cerr << "Device: " << wrapper.DeviceName(opt.Platform(), opt.Device()) << endl;
+			for (auto& device : devices)
+			{
+				cerr << "Platform: " << info.PlatformName(device.first) << endl;
+				cerr << "Device: " << info.DeviceName(device.first, device.second) << endl;
+			}
 		}
 	}
 	else
@@ -119,7 +122,7 @@ bool EmberGenome(EmberOptions& opt)
 	}
 
 	//SheepTools will own the created renderer and will take care of cleaning it up.
-	SheepTools<T, bucketT> tools(opt.PalettePath(), CreateRenderer<T, bucketT>(opt.EmberCL() ? OPENCL_RENDERER : CPU_RENDERER, opt.Platform(), opt.Device(), false, 0, emberReport2));
+	SheepTools<T, float> tools(opt.PalettePath(), CreateRenderer<T>(opt.EmberCL() ? OPENCL_RENDERER : CPU_RENDERER, devices, false, 0, emberReport2));
 
 	tools.SetSpinParams(!opt.UnsmoothEdge(),
 						T(opt.Stagger()),
@@ -175,7 +178,7 @@ bool EmberGenome(EmberOptions& opt)
 
 			while (std::getline(iss, token, ','))
 			{
-				if (parser.Atoi(token.c_str(), val))
+				if (parser.Aton(token.c_str(), val))
 				{
 					if (val < varList.Size())
 						vars.push_back(static_cast<eVariationId>(val));
@@ -188,7 +191,7 @@ bool EmberGenome(EmberOptions& opt)
 
 			while (std::getline(iss, token, ','))
 			{
-				if (parser.Atoi(token.c_str(), val))
+				if (parser.Aton(token.c_str(), val))
 				{
 					if (val < varList.Size())
 						noVars.push_back(static_cast<eVariationId>(val));
@@ -321,8 +324,8 @@ bool EmberGenome(EmberOptions& opt)
 			embers[i].DeleteMotionElements();
 		}
 
-		firstFrame = uint(opt.FirstFrame() == UINT_MAX ? embers[0].m_Time : opt.FirstFrame());
-		lastFrame  = uint(opt.LastFrame()  == UINT_MAX ? embers.back().m_Time : opt.LastFrame());
+		firstFrame = size_t(opt.FirstFrame() == UINT_MAX ? embers[0].m_Time : opt.FirstFrame());
+		lastFrame  = size_t(opt.LastFrame()  == UINT_MAX ? embers.back().m_Time : opt.LastFrame());
 
 		if (lastFrame < firstFrame)
 			lastFrame = firstFrame;
@@ -335,7 +338,7 @@ bool EmberGenome(EmberOptions& opt)
 
 			for (i = 0; i < embers.size(); i++)
 			{
-				if (ftime == uint(embers[i].m_Time))
+				if (ftime == size_t(embers[i].m_Time))
 				{
 					interpolated = embers[i];
 					exactTimeMatch = true;
@@ -349,7 +352,7 @@ bool EmberGenome(EmberOptions& opt)
 
 				for (i = 0; i < embers.size(); i++)
 				{
-					if (ftime == uint(embers[i].m_Time - 1))
+					if (ftime == size_t(embers[i].m_Time - 1))
 					{
 						exactTimeMatch = true;
 						break;
@@ -357,7 +360,7 @@ bool EmberGenome(EmberOptions& opt)
 				}
 
 				if (!exactTimeMatch)
-					interpolated.m_AffineInterp = INTERP_LINEAR;
+					interpolated.m_AffineInterp = AFFINE_INTERP_LINEAR;
 			}
 
 			if (pTemplate)
@@ -400,23 +403,12 @@ bool EmberGenome(EmberOptions& opt)
 
 			if (i < embers.size() - 1)
 			{
-				vector<Ember<T>> interpEmbers;
-
-				interpEmbers.push_back(embers[i]);
-				interpEmbers.push_back(embers[i + 1]);
-
-				if (opt.Loops() > 0)
-				{
-					//We might have looped a non-integral number of times, so store the last result as our flame to interpolate from.
-					interpEmbers[i] = result;
-				}
-
 				for (frame = 0; frame < opt.Frames(); frame++)
 				{
 					seqFlag = (frame == 0 || frame == opt.Frames() - 1);
 					blend = frame / T(opt.Frames());
 					result.Clear();
-					tools.SpinInter(&interpEmbers[i], pTemplate, result, frameCount++, seqFlag, blend);
+					tools.SpinInter(&embers[i], pTemplate, result, frameCount++, seqFlag, blend);
 					cout << emberToXml.ToString(result, opt.Extras(), opt.PrintEditDepth(), !opt.NoEdits(), false, opt.HexPalette());
 				}
 			}
@@ -500,7 +492,7 @@ bool EmberGenome(EmberOptions& opt)
 
 			oldX = embers[i].m_CenterX;
 			oldY = embers[i].m_CenterY;
-			embers[i].m_FinalRasH = uint(T(embers[i].m_FinalRasH) / T(opt.Frames()));
+			embers[i].m_FinalRasH = size_t(T(embers[i].m_FinalRasH) / T(opt.Frames()));
 
 			embers[i].m_CenterY = embers[i].m_CenterY - ((opt.Frames() - 1) * embers[i].m_FinalRasH) /
 				(2 * embers[i].m_PixelsPerUnit * pow(T(2.0), embers[i].m_Zoom));
@@ -596,7 +588,7 @@ bool EmberGenome(EmberOptions& opt)
 						mutMeth = MUTATE_NOT_SPECIFIED;
 					}
 
-					os << tools.Mutate(orig, mutMeth, vars, opt.Symmetry(), T(opt.Speed()));
+					os << tools.Mutate(orig, mutMeth, vars, opt.Symmetry(), T(opt.Speed()), MAX_CL_VARS);
 
 					//Scan string returned for 'mutate color'.
 					if (strstr(os.str().c_str(), "mutate color"))
@@ -647,7 +639,7 @@ bool EmberGenome(EmberOptions& opt)
 				{
 					os << "random";
 					randomMode = true;
-					tools.Random(orig, vars, opt.Symmetry(), 0);
+					tools.Random(orig, vars, opt.Symmetry(), 0, MAX_CL_VARS);
 					aselp0 = nullptr;
 					aselp1 = nullptr;
 				}
@@ -793,18 +785,18 @@ int _tmain(int argc, _TCHAR* argv[])
 #ifdef DO_DOUBLE
 		if (opt.Bits() == 64)
 		{
-			b = EmberGenome<double, double>(opt);
+			b = EmberGenome<double>(opt);
 		}
 		else
 #endif
 		if (opt.Bits() == 33)
 		{
-			b = EmberGenome<float, float>(opt);
+			b = EmberGenome<float>(opt);
 		}
 		else if (opt.Bits() == 32)
 		{
 			cerr << "Bits 32/int histogram no longer supported. Using bits == 33 (float)." << endl;
-			b = EmberGenome<float, float>(opt);
+			b = EmberGenome<float>(opt);
 		}
 	}
 

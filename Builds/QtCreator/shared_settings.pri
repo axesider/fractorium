@@ -1,5 +1,15 @@
-CONFIG += warn_off
-VERSION = 0.1.4.7
+VERSION = 0.1.4.9
+
+CONFIG(release, debug|release) {
+	CONFIG += warn_off
+	DESTDIR = ../../../Bin/release
+}
+
+CONFIG(debug, debug|release) {
+	DESTDIR = ../../../Bin/debug
+}
+
+QMAKE_POST_LINK += $$quote(cp --update ../../../Data/flam3-palettes.xml $${DESTDIR}$$escape_expand(\n\t))
 
 macx {
   LIBS += -framework OpenGL
@@ -33,13 +43,15 @@ native {
   QMAKE_CXXFLAGS += -march=k8
 }
 
-
-DESTDIR = $$(HOME)/Dev/fractorium/Bin
-debug:DESTDIR = $$(HOME)/Dev/fractorium/Dbg
+OBJECTS_DIR = $$DESTDIR/.obj
+MOC_DIR = $$DESTDIR/.moc
+RCC_DIR = $$DESTDIR/.qrc
+UI_DIR = $$DESTDIR/.ui
 
 LIBS += -L/usr/lib -ljpeg
 LIBS += -L/usr/lib -lpng
 LIBS += -L/usr/lib -ltbb
+LIBS += -L/usr/lib -lpthread
 LIBS += -L/usr/lib/x86_64-linux-gnu -lxml2
 
 CMAKE_CXXFLAGS += -DCL_USE_DEPRECATED_OPENCL_1_1_APIS

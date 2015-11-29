@@ -313,7 +313,7 @@ void GLEmberController<T>::DrawAffines(bool pre, bool post)
 	{
 		if (pre && m_Fractorium->DrawAllPre())//Draw all pre affine if specified.
 		{
-			for (uint i = 0; i < ember->TotalXformCount(); i++)
+			for (size_t i = 0; i < ember->TotalXformCount(); i++)
 			{
 				Xform<T>* xform = ember->GetTotalXform(i);
 				bool selected = dragging ? (m_SelectedXform == xform) : (m_HoverXform == xform);
@@ -328,7 +328,7 @@ void GLEmberController<T>::DrawAffines(bool pre, bool post)
 
 		if (post && m_Fractorium->DrawAllPost())//Draw all post affine if specified.
 		{
-			for (uint i = 0; i < ember->TotalXformCount(); i++)
+			for (size_t i = 0; i < ember->TotalXformCount(); i++)
 			{
 				Xform<T>* xform = ember->GetTotalXform(i);
 				bool selected = dragging ? (m_SelectedXform == xform) : (m_HoverXform == xform);
@@ -1025,7 +1025,7 @@ void GLWidget::DrawAffineHelper(int index, bool selected, bool pre, bool final, 
 
 	if (selected)
 	{
-		for (int i = 1; i <= 64; i++)//The circle.
+		for (size_t i = 1; i <= 64; i++)//The circle.
 		{
 			float theta = float(M_PI) * 2.0f * float(i % 64) / 64.0f;
 			float fx = float(cos(theta));
@@ -1084,7 +1084,7 @@ int GLEmberController<T>::UpdateHover(v3T& glCoords)
 	m_HoverType = HoverNone;
 
 	//If there's a selected/current xform, check it first so it gets precedence over the others.
-	if (m_SelectedXform != nullptr)
+	if (m_SelectedXform)
 	{
 		//These checks prevent highlighting the pre/post selected xform circle, when one is set to show all, and the other
 		//is set to show current, and the user hovers over another xform, but doesn't select it, then moves the mouse
@@ -1100,7 +1100,7 @@ int GLEmberController<T>::UpdateHover(v3T& glCoords)
 	}
 
 	//Check all xforms.
-	for (uint i = 0; i < ember->TotalXformCount(); i++)
+	for (size_t i = 0; i < ember->TotalXformCount(); i++)
 	{
 		Xform<T>* xform = ember->GetTotalXform(i);
 

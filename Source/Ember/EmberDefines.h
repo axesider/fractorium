@@ -32,20 +32,18 @@
 
 //Wrap the sincos function for Macs and PC.
 #if defined(__APPLE__) || defined(_MSC_VER)
-	#define sincos(x, s, c) *(s)=sin(x); *(c)=cos(x);
+	#define sincos(x, s, c) *(s)=std::sin(x); *(c)=std::cos(x);
 #else
-	//extern void sincos(double x, double *s, double *c);
-	//extern void sincos(float x, float *s, float *c);
 	static void sincos(float x, float* s, float* c)
 	{
-		*s = sin(x);
-		*c = cos(x);
+		*s = std::sin(x);
+		*c = std::cos(x);
 	}
 #endif
 
 namespace EmberNs
 {
-#define EMBER_VERSION "0.4.1.9"
+#define EMBER_VERSION "0.9.9.2"
 #define EPS6 T(1e-6)
 #define EPS std::numeric_limits<T>::epsilon()//Apoplugin.h uses -20, but it's more mathematically correct to do it this way.
 #define ISAAC_SIZE 4
@@ -95,10 +93,20 @@ static inline size_t NowMs()
 #define DO_DOUBLE 1//Comment this out for shorter build times during development. Always uncomment for release.
 //#define ISAAC_FLAM3_DEBUG 1//This is almost never needed, but is very useful when troubleshooting difficult bugs. Enable it to do a side by side comparison with flam3.
 
+//These two must always match.
+#ifdef WIN32
+#define ALIGN __declspec(align(16))
+#else
+#define ALIGN __attribute__ ((aligned (16)))
+#endif
+
+#define ALIGN_CL "((aligned (16)))"//The extra parens are necessary.
+
 #if GLM_VERSION >= 96
 	#define v2T  glm::tvec2<T, glm::defaultp>
 	#define v3T  glm::tvec3<T, glm::defaultp>
 	#define v4T  glm::tvec4<T, glm::defaultp>
+	#define v4bT glm::tvec4<bucketT, glm::defaultp>
 	#define m2T  glm::tmat2x2<T, glm::defaultp>
 	#define m3T  glm::tmat3x3<T, glm::defaultp>
 	#define m4T  glm::tmat4x4<T, glm::defaultp>
@@ -107,6 +115,7 @@ static inline size_t NowMs()
 	#define v2T  glm::detail::tvec2<T, glm::defaultp>
 	#define v3T  glm::detail::tvec3<T, glm::defaultp>
 	#define v4T  glm::detail::tvec4<T, glm::defaultp>
+	#define v4bT glm::detail::tvec4<bucketT, glm::defaultp>
 	#define m2T  glm::detail::tmat2x2<T, glm::defaultp>
 	#define m3T  glm::detail::tmat3x3<T, glm::defaultp>
 	#define m4T  glm::detail::tmat4x4<T, glm::defaultp>
@@ -114,7 +123,7 @@ static inline size_t NowMs()
 #endif
 
 enum eInterp : uint { EMBER_INTERP_LINEAR = 0, EMBER_INTERP_SMOOTH = 1 };
-enum eAffineInterp : uint { INTERP_LINEAR = 0, INTERP_LOG = 1, INTERP_COMPAT = 2, INTERP_OLDER = 3 };
+enum eAffineInterp : uint { AFFINE_INTERP_LINEAR = 0, AFFINE_INTERP_LOG = 1, AFFINE_INTERP_COMPAT = 2, AFFINE_INTERP_OLDER = 3 };
 enum ePaletteMode : uint { PALETTE_STEP = 0, PALETTE_LINEAR = 1 };
 enum ePaletteInterp : uint { INTERP_HSV = 0, INTERP_SWEEP = 1 };
 enum eMotion : uint { MOTION_SIN = 1, MOTION_TRIANGLE = 2, MOTION_HILL = 3, MOTION_SAW = 4 };
@@ -135,14 +144,13 @@ enum eEmberMotionParam : uint
 	FLAME_MOTION_CENTER_X = 7,
 	FLAME_MOTION_CENTER_Y = 8,
 	FLAME_MOTION_ROTATE = 9,
-	FLAME_MOTION_HUE = 10,
-	FLAME_MOTION_BRIGHTNESS = 11,
-	FLAME_MOTION_GAMMA = 12,
-	FLAME_MOTION_GAMMA_THRESH = 13,
-	FLAME_MOTION_HIGHLIGHT_POWER = 14,
-	FLAME_MOTION_BACKGROUND_R = 15,
-	FLAME_MOTION_BACKGROUND_G = 16,
-	FLAME_MOTION_BACKGROUND_B = 17,
-	FLAME_MOTION_VIBRANCY = 18
+	FLAME_MOTION_BRIGHTNESS = 10,
+	FLAME_MOTION_GAMMA = 11,
+	FLAME_MOTION_GAMMA_THRESH = 12,
+	FLAME_MOTION_HIGHLIGHT_POWER = 13,
+	FLAME_MOTION_BACKGROUND_R = 14,
+	FLAME_MOTION_BACKGROUND_G = 15,
+	FLAME_MOTION_BACKGROUND_B = 16,
+	FLAME_MOTION_VIBRANCY = 17
 };
 }

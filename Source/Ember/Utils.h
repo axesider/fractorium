@@ -42,6 +42,18 @@ static inline bool FindIf(c& container, pr pred)
 }
 
 /// <summary>
+/// Thin wrapper around std::find_if() determine if a value exists at least once.
+/// </summary>
+/// <param name="container">The container to call find_if() on</param>
+/// <param name="val">The value to search for</param>
+/// <returns>True if the value was contained at least once, else false.</returns>
+template<class c, class T>
+static inline bool Contains(c& container, const T& val)
+{
+	return std::find_if(container.begin(), container.end(), [&](const T& t) -> bool { return t == val; }) != container.end();
+}
+
+/// <summary>
 /// Thin wrapper around computing the total size of a vector.
 /// </summary>
 /// <param name="vec">The vector to compute the size of</param>
@@ -182,7 +194,7 @@ static bool ReadFile(const char* filename, string& buf, bool nullTerminate = tru
 	{
 		fopen_s(&f, filename, "rb");//Open in binary mode.
 
-		if (f != nullptr)
+		if (f)
 		{
 			struct _stat statBuf;
 
@@ -215,15 +227,22 @@ static bool ReadFile(const char* filename, string& buf, bool nullTerminate = tru
 			}
 
 			fclose(f);
+			f = nullptr;
 		}
+	}
+	catch (const std::exception& e)
+	{
+		cout << "Error: Reading file " << filename << " failed: " << e.what() << endl;
+		b = false;
 	}
 	catch (...)
 	{
-		if (f != nullptr)
-			fclose(f);
-
+		cout << "Error: Reading file " << filename << " failed." << endl;
 		b = false;
 	}
+
+	if (f)
+		fclose(f);
 
 	return b;
 }
@@ -274,9 +293,9 @@ static void CopyVec(vector<T>& dest, const vector<U>& source, std::function<void
 template <typename T>
 static void ClearVec(vector<T*>& vec, bool arrayDelete = false)
 {
-	for (uint i = 0; i < vec.size(); i++)
+	for (size_t i = 0; i < vec.size(); i++)
 	{
-		if (vec[i] != nullptr)
+		if (vec[i])
 		{
 			if (arrayDelete)
 				delete [] vec[i];
@@ -288,6 +307,32 @@ static void ClearVec(vector<T*>& vec, bool arrayDelete = false)
 	}
 
 	vec.clear();
+}
+
+/// <summary>
+/// Determine whether all elements in two containers are equal.
+/// </summary>
+/// <param name="c1">The first collection to compare</param>
+/// <param name="c2">The second collection to compare</param>
+/// <returns>True if the sizes and all elements in both collections are equal, else false.</returns>
+template <typename T>
+static bool Equal(const T& c1, const T& c2)
+{
+	bool equal = c1.size() == c2.size();
+
+	if (equal)
+	{
+		for (auto it1 = c1.begin(), it2 = c2.begin(); it1 != c1.end(); ++it1, ++it2)
+		{
+			if (*it1 != *it2)
+			{
+				equal = false;
+				break;
+			}
+		}
+	}
+
+	return equal;
 }
 
 /// <summary>
@@ -309,15 +354,15 @@ static inline void Memset(vector<T>& vec, int val = 0)
 /// <param name="x">The value to return the floor of</param>
 /// <returns>The floored value</returns>
 template <typename T>
-static inline int Floor(T val)
+static inline intmax_t Floor(T val)
 {
 	if (val >= 0)
 	{
-		return static_cast<int>(val);
+		return static_cast<intmax_t>(val);
 	}
 	else
 	{
-		int i = static_cast<int>(val);//Truncate.
+		intmax_t i = static_cast<intmax_t>(val);//Truncate.
 		return i - (i > val);//Convert trunc to floor.
 	}
 }
@@ -545,7 +590,7 @@ static
 #endif
 float SafeTan<float>(float x)
 {
-	return tan(Clamp<float>(x, FLOAT_MIN_TAN, FLOAT_MAX_TAN));
+	return std::tan(Clamp<float>(x, FLOAT_MIN_TAN, FLOAT_MAX_TAN));
 }
 
 template <>
@@ -554,7 +599,7 @@ static
 #endif
 double SafeTan<double>(double x)
 {
-	return tan(x);
+	return std::tan(x);
 }
 
 /// <summary>
@@ -603,7 +648,7 @@ static inline T Spread(T x, T y)
 template <typename T>
 static inline T Powq4(T x, T y)
 {
-	return pow(fabs(x), y) * SignNz(x);
+	return std::pow(std::fabs(x), y) * SignNz(x);
 }
 
 /// <summary>
@@ -667,7 +712,7 @@ static inline T Fabsmod(T v)
 template <typename T>
 static inline T Fosc(T p, T amp, T ph)
 {
-	return T(0.5) - cos(p * amp + ph) * T(0.5);
+	return T(0.5) - std::cos(p * amp + ph) * T(0.5);
 }
 
 /// <summary>
@@ -679,7 +724,7 @@ static inline T Fosc(T p, T amp, T ph)
 template <typename T>
 static inline T Foscn(T p, T ph)
 {
-	return T(0.5) - cos(p + ph) * T(0.5);
+	return T(0.5) - std::cos(p + ph) * T(0.5);
 }
 
 /// <summary>
@@ -690,7 +735,7 @@ static inline T Foscn(T p, T ph)
 template <typename T>
 static inline T LogScale(T x)
 {
-	return x == 0 ? 0 : log((fabs(x) + 1) * T(M_E)) * SignNz(x) / T(M_E);
+	return x == 0 ? 0 : std::log((fabs(x) + 1) * T(M_E)) * SignNz(x) / T(M_E);
 }
 
 /// <summary>
@@ -701,7 +746,7 @@ static inline T LogScale(T x)
 template <typename T>
 static inline T LogMap(T x)
 {
-	return x == 0 ? 0 : (T(M_E) + log(x * T(M_E))) * T(0.25) * SignNz(x);
+	return x == 0 ? 0 : (T(M_E) + std::log(x * T(M_E))) * T(0.25) * SignNz(x);
 }
 
 /// <summary>
@@ -867,24 +912,9 @@ static string GetPath(const string& filename)
 template <typename T>
 static inline T Arg(char* name, T def)
 {
-	T t;
-	return t;
-}
-
-/// <summary>
-/// Template specialization for Arg<>() with a type of int.
-/// </summary>
-/// <param name="name">The name of the environment variable to query</param>
-/// <param name="def">The default value to return if the environment variable was not present</param>
-/// <returns>The value of the specified environment variable if found, else default</returns>
-template <>
-#ifdef _MSC_VER
-static
-#endif
-int Arg<int>(char* name, int def)
-{
+#ifdef MSC_VER
 	char* ch;
-	int returnVal;
+	T returnVal;
 #ifdef _MSC_VER
 	size_t len;
 	errno_t err = _dupenv_s(&ch, &len, name);
@@ -896,27 +926,22 @@ int Arg<int>(char* name, int def)
 	if (err || !ch)
 		returnVal = def;
 	else
-		returnVal = atoi(ch);
+	{
+		T tempVal;
+		istringstream istr(ch);
+
+		istr >> tempVal;
+
+		if (!istr.bad() && !istr.fail())
+			returnVal = tempVal;
+		else
+			returnVal = def;
+	}
 
 #ifdef WIN32
 	free(ch);
 #endif
 	return returnVal;
-}
-
-/// <summary>
-/// Template specialization for Arg<>() with a type of uint.
-/// </summary>
-/// <param name="name">The name of the environment variable to query</param>
-/// <param name="def">The default value to return if the environment variable was not present</param>
-/// <returns>The value of the specified environment variable if found, else default</returns>
-template <>
-#ifdef _MSC_VER
-static
-#endif
-uint Arg<uint>(char* name, uint def)
-{
-	return Arg<int>(name, static_cast<int>(def));
 }
 
 /// <summary>
@@ -932,39 +957,6 @@ static
 bool Arg<bool>(char* name, bool def)
 {
 	return (Arg<int>(name, -999) != -999) ? true : def;
-}
-
-/// <summary>
-/// Template specialization for Arg<>() with a type of double.
-/// </summary>
-/// <param name="name">The name of the environment variable to query</param>
-/// <param name="def">The default value to return if the environment variable was not present</param>
-/// <returns>The value of the specified environment variable if found, else default</returns>
-template <>
-#ifdef _MSC_VER
-static
-#endif
-double Arg<double>(char* name, double def)
-{
-	char* ch;
-	double returnVal;
-#ifdef _MSC_VER
-	size_t len;
-	errno_t err = _dupenv_s(&ch, &len, name);
-#else
-	int err = 1;
-	ch = getenv(name);
-#endif
-
-	if (err || !ch)
-		returnVal = def;
-	else
-		returnVal = atof(ch);
-
-#ifdef _MSC_VER
-	free(ch);
-#endif
-	return returnVal;
 }
 
 /// <summary>
@@ -1033,6 +1025,24 @@ static uint FindAndReplace(T& source, const T& find, const T& replace)
 	}
 
 	return replaceCount;
+}
+
+/// <summary>
+/// Split a string into tokens and place them in a vector.
+/// </summary>
+/// <param name="str">The string to split</param>
+/// <param name="del">The delimiter to split the string on</param>
+/// <returns>The split strings, each as an element in a vector.</returns>
+static vector<string> Split(const string& str, char del)
+{
+	string tok;
+	vector<string> vec;
+	stringstream ss(str);
+
+	while (getline(ss, tok, del))
+		vec.push_back(tok);
+
+	return vec;
 }
 
 /// <summary>

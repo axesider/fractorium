@@ -3,6 +3,7 @@
 #include "EmberCLPch.h"
 #include "EmberCLStructs.h"
 #include "EmberCLFunctions.h"
+#include "FunctionMapper.h"
 
 /// <summary>
 /// IterOpenCLKernelCreator class.
@@ -24,45 +25,36 @@ class EMBERCL_API IterOpenCLKernelCreator
 {
 public:
 	IterOpenCLKernelCreator();
-	IterOpenCLKernelCreator(bool nVidia);
-	string ZeroizeKernel();
-	string ZeroizeEntryPoint();
-	string IterEntryPoint();
-	string CreateIterKernelString(Ember<T>& ember, string& parVarDefines, bool lockAccum = false, bool doAccum = true);
-	static void ParVarIndexDefines(Ember<T>& ember, pair<string, vector<T>>& params, bool doVals = true, bool doString = true);
-	static bool IsBuildRequired(Ember<T>& ember1, Ember<T>& ember2);
+	const string& ZeroizeKernel() const;
+	const string& ZeroizeEntryPoint() const;
+	const string& SumHistKernel() const;
+	const string& SumHistEntryPoint() const;
+	const string& IterEntryPoint() const;
+	string CreateIterKernelString(const Ember<T>& ember, string& parVarDefines, bool lockAccum = false, bool doAccum = true);
+	string GlobalFunctionsString(const Ember<T>& ember);
+	static void ParVarIndexDefines(const Ember<T>& ember, pair<string, vector<T>>& params, bool doVals = true, bool doString = true);
+	static string VariationStateString(const Ember<T>& ember);
+	static string VariationStateInitString(const Ember<T>& ember);
+	static bool IsBuildRequired(const Ember<T>& ember1, const Ember<T>& ember2);
 
 private:
-	string CreateZeroizeKernelString();
-	string CreateProjectionString(Ember<T>& ember);
+	string CreateZeroizeKernelString() const;
+	string CreateSumHistKernelString() const;
+	string CreateProjectionString(const Ember<T>& ember) const;
 
 	string m_IterEntryPoint;
 	string m_ZeroizeKernel;
 	string m_ZeroizeEntryPoint;
-	bool m_NVidia;
+	string m_SumHistKernel;
+	string m_SumHistEntryPoint;
+	FunctionMapper m_FunctionMapper;
 };
-//
-//template EMBERCL_API class IterOpenCLKernelCreator<float>;
-//
-//#ifdef DO_DOUBLE
-//	template EMBERCL_API class IterOpenCLKernelCreator<double>;
-//#endif
-
-//
-//template EMBERCL_API string IterOpenCLKernelCreator::CreateIterKernelString<float>(Ember<float>& ember, string& parVarDefines, bool lockAccum, bool doAccum);
-//template EMBERCL_API string IterOpenCLKernelCreator::CreateIterKernelString<double>(Ember<double>& ember, string& parVarDefines, bool lockAccum, bool doAccum);
-//
-//template EMBERCL_API void IterOpenCLKernelCreator::ParVarIndexDefines<float>(Ember<float>& ember, pair<string, vector<float>>& params, bool doVals, bool doString);
-//template EMBERCL_API void IterOpenCLKernelCreator::ParVarIndexDefines<double>(Ember<double>& ember, pair<string, vector<double>>& params, bool doVals, bool doString);
-//
-//template EMBERCL_API bool IterOpenCLKernelCreator::IsBuildRequired<float>(Ember<float>& ember1, Ember<float>& ember2);
-//template EMBERCL_API bool IterOpenCLKernelCreator::IsBuildRequired<double>(Ember<double>& ember1, Ember<double>& ember2);
 
 #ifdef OPEN_CL_TEST_AREA
-typedef void (*KernelFuncPointer) (uint gridWidth, uint gridHeight, uint blockWidth, uint blockHeight,
-								   uint BLOCK_ID_X, uint BLOCK_ID_Y, uint THREAD_ID_X, uint THREAD_ID_Y);
+typedef void (*KernelFuncPointer) (size_t gridWidth, size_t gridHeight, size_t blockWidth, size_t blockHeight,
+								   size_t BLOCK_ID_X, size_t BLOCK_ID_Y, size_t THREAD_ID_X, size_t THREAD_ID_Y);
 
-static void OpenCLSim(uint gridWidth, uint gridHeight, uint blockWidth, uint blockHeight, KernelFuncPointer func)
+static void OpenCLSim(size_t gridWidth, size_t gridHeight, size_t blockWidth, size_t blockHeight, KernelFuncPointer func)
 {
 	cout << "OpenCLSim(): " << endl;
 	cout << "	Params: " << endl;
@@ -71,13 +63,13 @@ static void OpenCLSim(uint gridWidth, uint gridHeight, uint blockWidth, uint blo
 	cout << "		blockW: " << blockWidth << endl;
 	cout << "		blockH: " << blockHeight << endl;
 
-	for (uint i = 0; i < gridHeight; i += blockHeight)
+	for (size_t i = 0; i < gridHeight; i += blockHeight)
 	{
-		for (uint j = 0; j < gridWidth; j += blockWidth)
+		for (size_t j = 0; j < gridWidth; j += blockWidth)
 		{
-			for (uint k = 0; k < blockHeight; k++)
+			for (size_t k = 0; k < blockHeight; k++)
 			{
-				for (uint l = 0; l < blockWidth; l++)
+				for (size_t l = 0; l < blockWidth; l++)
 				{
 					func(gridWidth, gridHeight, blockWidth, blockHeight, j / blockWidth, i / blockHeight, l, k);
 				}

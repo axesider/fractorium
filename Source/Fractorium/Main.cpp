@@ -30,23 +30,24 @@ int main(int argc, char *argv[])
 	putenv(const_cast<char*>("GPU_MAX_ALLOC_PERCENT=100"));
 #endif
 	
-#ifndef WIN32
-	a.setStyleSheet("QGroupBox { border: 1px solid gray; border-radius: 3px; margin-top: 1.1em; background-color: transparent; } \n"
-	"QTabBar::tab { height: 2.8ex; } \n"
-	"QGroupBox::title "
-	"{"
-	 "  background-color: transparent;"
-	 "  subcontrol-origin: margin; "
-	 //"  left: 3px; "
-	 "  subcontrol-position: top left;"
-	 "  padding: 0 3px 0 3px;"
-	 //"    padding: 2px;"
-	 "}" );
-#endif
+	int rv = -1;
 
-	Fractorium w;
-	w.show();
-	a.installEventFilter(&w);
-	return a.exec();
+	try
+	{
+		Fractorium w;
+		w.show();
+		a.installEventFilter(&w);
+		rv = a.exec();
+	}
+	catch (const std::exception& e)
+	{
+		QMessageBox::critical(0, "Fatal Error", QString::fromStdString(e.what()));
+	}
+	catch (const char* e)
+	{
+		QMessageBox::critical(0, "Fatal Error", e);
+	}
+
+	return rv;
 }
 

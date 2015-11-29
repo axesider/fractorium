@@ -81,81 +81,100 @@ public:
 		if (!m_Init)
 		{
 			m_BadParamNames.reserve(100);
-			m_BadParamNames.push_back(pair<string, string>("swtin_distort",   "stwin_distort"));//stwin.
-			m_BadParamNames.push_back(pair<string, string>("pow_numerator",   "pow_block_numerator"));//pow_block.
-			m_BadParamNames.push_back(pair<string, string>("pow_denominator", "pow_block_denominator"));
-			m_BadParamNames.push_back(pair<string, string>("pow_root",        "pow_block_root"));
-			m_BadParamNames.push_back(pair<string, string>("pow_correctn",    "pow_block_correctn"));
-			m_BadParamNames.push_back(pair<string, string>("pow_correctd",    "pow_block_correctd"));
-			m_BadParamNames.push_back(pair<string, string>("pow_power",       "pow_block_power"));
-			m_BadParamNames.push_back(pair<string, string>("lT", "linearT_powX"));//linearT.
-			m_BadParamNames.push_back(pair<string, string>("lT", "linearT_powY"));
-			m_BadParamNames.push_back(pair<string, string>("Re_A", "Mobius_Re_A"));//Mobius.
-			m_BadParamNames.push_back(pair<string, string>("Im_A", "Mobius_Im_A"));
-			m_BadParamNames.push_back(pair<string, string>("Re_B", "Mobius_Re_B"));
-			m_BadParamNames.push_back(pair<string, string>("Im_B", "Mobius_Im_B"));
-			m_BadParamNames.push_back(pair<string, string>("Re_C", "Mobius_Re_C"));
-			m_BadParamNames.push_back(pair<string, string>("Im_C", "Mobius_Im_C"));
-			m_BadParamNames.push_back(pair<string, string>("Re_D", "Mobius_Re_D"));
-			m_BadParamNames.push_back(pair<string, string>("Im_D", "Mobius_Im_D"));
-			m_BadParamNames.push_back(pair<string, string>("rx_sin", "rotate_x_sin"));//rotate_x.
-			m_BadParamNames.push_back(pair<string, string>("rx_cos", "rotate_x_cos"));
-			m_BadParamNames.push_back(pair<string, string>("ry_sin", "rotate_y_sin"));//rotate_y.
-			m_BadParamNames.push_back(pair<string, string>("ry_cos", "rotate_y_cos"));
-			m_BadParamNames.push_back(pair<string, string>("intrfr2_a1", "interference2_a1"));//interference2.
-			m_BadParamNames.push_back(pair<string, string>("intrfr2_b1", "interference2_b1"));
-			m_BadParamNames.push_back(pair<string, string>("intrfr2_c1", "interference2_c1"));
-			m_BadParamNames.push_back(pair<string, string>("intrfr2_p1", "interference2_p1"));
-			m_BadParamNames.push_back(pair<string, string>("intrfr2_t1", "interference2_t1"));
-			m_BadParamNames.push_back(pair<string, string>("intrfr2_a2", "interference2_a2"));
-			m_BadParamNames.push_back(pair<string, string>("intrfr2_b2", "interference2_b2"));
-			m_BadParamNames.push_back(pair<string, string>("intrfr2_c2", "interference2_c2"));
-			m_BadParamNames.push_back(pair<string, string>("intrfr2_p2", "interference2_p2"));
-			m_BadParamNames.push_back(pair<string, string>("intrfr2_t2", "interference2_t2"));
-			m_BadParamNames.push_back(pair<string, string>("octa_x", "octagon_x"));//octagon.
-			m_BadParamNames.push_back(pair<string, string>("octa_y", "octagon_y"));
-			m_BadParamNames.push_back(pair<string, string>("octa_z", "octagon_z"));
-			m_BadParamNames.push_back(pair<string, string>("bubble_x", "bubble2_x"));//bubble2.
-			m_BadParamNames.push_back(pair<string, string>("bubble_y", "bubble2_y"));
-			m_BadParamNames.push_back(pair<string, string>("bubble_z", "bubble2_z"));
-			m_BadParamNames.push_back(pair<string, string>("cubic3D_xpand", "cubicLattice_3D_xpand"));//cubicLattice_3D.
-			m_BadParamNames.push_back(pair<string, string>("cubic3D_style", "cubicLattice_3D_style"));
-			m_BadParamNames.push_back(pair<string, string>("splitb_x",  "SplitBrdr_x"));//SplitBrdr.
-			m_BadParamNames.push_back(pair<string, string>("splitb_y",  "SplitBrdr_y"));
-			m_BadParamNames.push_back(pair<string, string>("splitb_px", "SplitBrdr_px"));
-			m_BadParamNames.push_back(pair<string, string>("splitb_py", "SplitBrdr_py"));
-			m_BadParamNames.push_back(pair<string, string>("dc_cyl_offset", "dc_cylinder_offset"));//dc_cylinder.
-			m_BadParamNames.push_back(pair<string, string>("dc_cyl_angle",  "dc_cylinder_angle"));
-			m_BadParamNames.push_back(pair<string, string>("dc_cyl_scale",  "dc_cylinder_scale"));
-			m_BadParamNames.push_back(pair<string, string>("cyl_x",         "dc_cylinder_x"));
-			m_BadParamNames.push_back(pair<string, string>("cyl_y",         "dc_cylinder_y"));
-			m_BadParamNames.push_back(pair<string, string>("cyl_blur",      "dc_cylinder_blur"));
-			m_BadParamNames.push_back(pair<string, string>("mobius_radius",   "mobius_strip_radius"));//mobius_strip.
-			m_BadParamNames.push_back(pair<string, string>("mobius_width",    "mobius_strip_width"));
-			m_BadParamNames.push_back(pair<string, string>("mobius_rect_x",   "mobius_strip_rect_x"));
-			m_BadParamNames.push_back(pair<string, string>("mobius_rect_y",   "mobius_strip_rect_y"));
-			m_BadParamNames.push_back(pair<string, string>("mobius_rotate_x", "mobius_strip_rotate_x"));
-			m_BadParamNames.push_back(pair<string, string>("mobius_rotate_y", "mobius_strip_rotate_y"));
-			m_BadParamNames.push_back(pair<string, string>("bwraps2_cellsize",    "bwraps_cellsize"));//bwraps2.
-			m_BadParamNames.push_back(pair<string, string>("bwraps2_space",       "bwraps_space"));
-			m_BadParamNames.push_back(pair<string, string>("bwraps2_gain",        "bwraps_gain"));
-			m_BadParamNames.push_back(pair<string, string>("bwraps2_inner_twist", "bwraps_inner_twist"));
-			m_BadParamNames.push_back(pair<string, string>("bwraps2_outer_twist", "bwraps_outer_twist"));
-			m_BadParamNames.push_back(pair<string, string>("bwraps7_cellsize",    "bwraps_cellsize"));//bwraps7.
-			m_BadParamNames.push_back(pair<string, string>("bwraps7_space",       "bwraps_space"));
-			m_BadParamNames.push_back(pair<string, string>("bwraps7_gain",        "bwraps_gain"));
-			m_BadParamNames.push_back(pair<string, string>("bwraps7_inner_twist", "bwraps_inner_twist"));
-			m_BadParamNames.push_back(pair<string, string>("bwraps7_outer_twist", "bwraps_outer_twist"));
-			m_BadParamNames.push_back(pair<string, string>("pre_bwraps2_cellsize",    "pre_bwraps_cellsize"));
-			m_BadParamNames.push_back(pair<string, string>("pre_bwraps2_space",       "pre_bwraps_space"));
-			m_BadParamNames.push_back(pair<string, string>("pre_bwraps2_gain",        "pre_bwraps_gain"));
-			m_BadParamNames.push_back(pair<string, string>("pre_bwraps2_inner_twist", "pre_bwraps_inner_twist"));
-			m_BadParamNames.push_back(pair<string, string>("pre_bwraps2_outer_twist", "pre_bwraps_outer_twist"));
-			m_BadParamNames.push_back(pair<string, string>("post_bwraps2_cellsize",    "post_bwraps_cellsize"));
-			m_BadParamNames.push_back(pair<string, string>("post_bwraps2_space",       "post_bwraps_space"));
-			m_BadParamNames.push_back(pair<string, string>("post_bwraps2_gain",        "post_bwraps_gain"));
-			m_BadParamNames.push_back(pair<string, string>("post_bwraps2_inner_twist", "post_bwraps_inner_twist"));
-			m_BadParamNames.push_back(pair<string, string>("post_bwraps2_outer_twist", "post_bwraps_outer_twist"));
+			m_BadParamNames["swtin_distort"] =   "stwin_distort";//stwin.
+			m_BadParamNames["pow_numerator"] =   "pow_block_numerator";//pow_block.
+			m_BadParamNames["pow_denominator"] = "pow_block_denominator";
+			m_BadParamNames["pow_root"] =        "pow_block_root";
+			m_BadParamNames["pow_correctn"] =    "pow_block_correctn";
+			m_BadParamNames["pow_correctd"] =    "pow_block_correctd";
+			m_BadParamNames["pow_power"] =       "pow_block_power";
+			m_BadParamNames["lt"] = "linearT_powX";//linearT.
+			m_BadParamNames["lt"] = "linearT_powY";
+			m_BadParamNames["re_a"] = "Mobius_Re_A";//Mobius.
+			m_BadParamNames["im_a"] = "Mobius_Im_A";
+			m_BadParamNames["re_b"] = "Mobius_Re_B";
+			m_BadParamNames["im_b"] = "Mobius_Im_B";
+			m_BadParamNames["re_c"] = "Mobius_Re_C";
+			m_BadParamNames["im_c"] = "Mobius_Im_C";
+			m_BadParamNames["re_d"] = "Mobius_Re_D";
+			m_BadParamNames["im_d"] = "Mobius_Im_D";
+			m_BadParamNames["rx_sin"] = "rotate_x_sin";//rotate_x.
+			m_BadParamNames["rx_cos"] = "rotate_x_cos";
+			m_BadParamNames["ry_sin"] = "rotate_y_sin";//rotate_y.
+			m_BadParamNames["ry_cos"] = "rotate_y_cos";
+			m_BadParamNames["intrfr2_a1"] = "interference2_a1";//interference2.
+			m_BadParamNames["intrfr2_b1"] = "interference2_b1";
+			m_BadParamNames["intrfr2_c1"] = "interference2_c1";
+			m_BadParamNames["intrfr2_p1"] = "interference2_p1";
+			m_BadParamNames["intrfr2_t1"] = "interference2_t1";
+			m_BadParamNames["intrfr2_a2"] = "interference2_a2";
+			m_BadParamNames["intrfr2_b2"] = "interference2_b2";
+			m_BadParamNames["intrfr2_c2"] = "interference2_c2";
+			m_BadParamNames["intrfr2_p2"] = "interference2_p2";
+			m_BadParamNames["intrfr2_t2"] = "interference2_t2";
+			m_BadParamNames["octa_x"] = "octagon_x";//octagon.
+			m_BadParamNames["octa_y"] = "octagon_y";
+			m_BadParamNames["octa_z"] = "octagon_z";
+			m_BadParamNames["bubble_x"] = "bubble2_x";//bubble2.
+			m_BadParamNames["bubble_y"] = "bubble2_y";
+			m_BadParamNames["bubble_z"] = "bubble2_z";
+			m_BadParamNames["cubic3d_xpand"] = "cubicLattice_3D_xpand";//cubicLattice_3D.
+			m_BadParamNames["cubic3d_style"] = "cubicLattice_3D_style";
+			m_BadParamNames["splitb_x"] =  "SplitBrdr_x";//SplitBrdr.
+			m_BadParamNames["splitb_y"] =  "SplitBrdr_y";
+			m_BadParamNames["splitb_px"] = "SplitBrdr_px";
+			m_BadParamNames["splitb_py"] = "SplitBrdr_py";
+			m_BadParamNames["dc_cyl_offset"] = "dc_cylinder_offset";//dc_cylinder.
+			m_BadParamNames["dc_cyl_angle"] =  "dc_cylinder_angle";
+			m_BadParamNames["dc_cyl_scale"] =  "dc_cylinder_scale";
+			m_BadParamNames["cyl_x"] =         "dc_cylinder_x";
+			m_BadParamNames["cyl_y"] =         "dc_cylinder_y";
+			m_BadParamNames["cyl_blur"] =      "dc_cylinder_blur";
+			m_BadParamNames["mobius_radius"] =   "mobius_strip_radius";//mobius_strip.
+			m_BadParamNames["mobius_width"] =    "mobius_strip_width";
+			m_BadParamNames["mobius_rect_x"] =   "mobius_strip_rect_x";
+			m_BadParamNames["mobius_rect_y"] =   "mobius_strip_rect_y";
+			m_BadParamNames["mobius_rotate_x"] = "mobius_strip_rotate_x";
+			m_BadParamNames["mobius_rotate_y"] = "mobius_strip_rotate_y";
+			m_BadParamNames["bwraps2_cellsize"] =    "bwraps_cellsize";//bwraps2.
+			m_BadParamNames["bwraps2_space"] =       "bwraps_space";
+			m_BadParamNames["bwraps2_gain"] =        "bwraps_gain";
+			m_BadParamNames["bwraps2_inner_twist"] = "bwraps_inner_twist";
+			m_BadParamNames["bwraps2_outer_twist"] = "bwraps_outer_twist";
+			m_BadParamNames["bwraps7_cellsize"] =    "bwraps_cellsize";//bwraps7.
+			m_BadParamNames["bwraps7_space"] =       "bwraps_space";
+			m_BadParamNames["bwraps7_gain"] =        "bwraps_gain";
+			m_BadParamNames["bwraps7_inner_twist"] = "bwraps_inner_twist";
+			m_BadParamNames["bwraps7_outer_twist"] = "bwraps_outer_twist";
+			m_BadParamNames["pre_bwraps2_cellsize"] =    "pre_bwraps_cellsize";
+			m_BadParamNames["pre_bwraps2_space"] =       "pre_bwraps_space";
+			m_BadParamNames["pre_bwraps2_gain"] =        "pre_bwraps_gain";
+			m_BadParamNames["pre_bwraps2_inner_twist"] = "pre_bwraps_inner_twist";
+			m_BadParamNames["pre_bwraps2_outer_twist"] = "pre_bwraps_outer_twist";
+			m_BadParamNames["post_bwraps2_cellsize"] =    "post_bwraps_cellsize";
+			m_BadParamNames["post_bwraps2_space"] =       "post_bwraps_space";
+			m_BadParamNames["post_bwraps2_gain"] =        "post_bwraps_gain";
+			m_BadParamNames["post_bwraps2_inner_twist"] = "post_bwraps_inner_twist";
+			m_BadParamNames["post_bwraps2_outer_twist"] = "post_bwraps_outer_twist";
+			m_BadParamNames["hexa3d_majp"] =  "hexaplay3D_majp";
+			m_BadParamNames["hexa3d_scale"] = "hexaplay3D_scale";
+			m_BadParamNames["hexa3d_zlift"] = "hexaplay3D_zlift";
+			m_BadParamNames["nb_numedges"] =		"nBlur_numEdges";
+			m_BadParamNames["nb_numstripes"] =		"nBlur_numStripes";
+			m_BadParamNames["nb_ratiostripes"] =	"nBlur_ratioStripes";
+			m_BadParamNames["nb_ratiohole"] =		"nBlur_ratioHole";
+			m_BadParamNames["nb_circumcircle"] =	"nBlur_circumCircle";
+			m_BadParamNames["nb_adjusttolinear"] = "nBlur_adjustToLinear";
+			m_BadParamNames["nb_equalblur"] =		"nBlur_equalBlur";
+			m_BadParamNames["nb_exactcalc"] =		"nBlur_exactCalc";
+			m_BadParamNames["nb_highlightedges"] = "nBlur_highlightEdges";
+			m_BadParamNames["octapol_r"] = "octapol_radius";
+			m_BadParamNames["number_of_stripes"] = "bubbleT3D_number_of_stripes";
+			m_BadParamNames["ratio_of_stripes"]  = "bubbleT3D_ratio_of_stripes";
+			m_BadParamNames["angle_of_hole"]	 = "bubbleT3D_angle_of_hole";
+			m_BadParamNames["exponentZ"]		 = "bubbleT3D_exponentZ";
+			m_BadParamNames["_symmetryZ"]		 = "bubbleT3D_symmetryZ";
+			m_BadParamNames["_modusBlur"]		 = "bubbleT3D_modusBlur";
 
 			m_FlattenNames.reserve(24);
 			m_FlattenNames.push_back("pre_crop");
@@ -316,10 +335,10 @@ public:
 		//An adjustment of +/- 360 degrees is made until this is true.
 		if (emberSize > 1)
 		{
-			for (uint i = 1; i < emberSize; i++)
+			for (size_t i = 1; i < emberSize; i++)
 			{
 				//Only do this adjustment if not in compat mode..
-				if (embers[i - 1].m_AffineInterp != INTERP_COMPAT && embers[i - 1].m_AffineInterp != INTERP_OLDER)
+				if (embers[i - 1].m_AffineInterp != AFFINE_INTERP_COMPAT && embers[i - 1].m_AffineInterp != AFFINE_INTERP_OLDER)
 				{
 					while (embers[i].m_Rotate < embers[i - 1].m_Rotate - 180)
 						embers[i].m_Rotate += 360;
@@ -363,32 +382,22 @@ public:
 	}
 
 	/// <summary>
-	/// Convert the string to a floating point value and return a bool indicating success.
+	/// Thin wrapper around converting the string to a numeric value and return a bool indicating success.
 	/// See error report for errors.
 	/// </summary>
 	/// <param name="str">The string to convert</param>
 	/// <param name="val">The converted value</param>
 	/// <returns>True if success, else false.</returns>
-	bool Atof(const char* str, T& val)
+	template <typename valT>
+	bool Aton(const char* str, valT& val)
 	{
 		bool b = true;
-		char* endp;
 		const char* loc = __FUNCTION__;
+		std::istringstream istr(str);
 
-		//Reset errno.
-		errno = 0;//Note that this is not thread-safe.
+		istr >> val;
 
-		//Convert the string using strtod().
-		val = T(strtod(str, &endp));
-
-		//Check errno & return string.
-		if (endp != str + strlen(str))
-		{
-			m_ErrorReport.push_back(string(loc) + " : Error converting " + string(str) + ", extra chars");
-			b = false;
-		}
-
-		if (errno)
+		if (istr.bad() || istr.fail())
 		{
 			m_ErrorReport.push_back(string(loc) + " : Error converting " + string(str));
 			b = false;
@@ -397,53 +406,7 @@ public:
 		return b;
 	}
 
-	/// <summary>
-	/// Thin wrapper around Atoi().
-	/// See error report for errors.
-	/// </summary>
-	/// <param name="str">The string to convert</param>
-	/// <param name="val">The converted uinteger value</param>
-	/// <returns>True if success, else false.</returns>
-	bool Atoi(const char* str, uint& val)
-	{
-		return Atoi(str, reinterpret_cast<int&>(val));
-	}
-
-	/// <summary>
-	/// Convert the string to an uinteger value and return a bool indicating success.
-	/// See error report for errors.
-	/// </summary>
-	/// <param name="str">The string to convert</param>
-	/// <param name="val">The converted uinteger value</param>
-	/// <returns>True if success, else false.</returns>
-	bool Atoi(const char* str, int& val)
-	{
-		bool b = true;
-		char* endp;
-		const char* loc = __FUNCTION__;
-
-		//Reset errno.
-		errno = 0;//Note that this is not thread-safe.
-
-		//Convert the string using strtod().
-		val = strtol(str, &endp, 10);
-
-		//Check errno & return string.
-		if (endp != str + strlen(str))
-		{
-			m_ErrorReport.push_back(string(loc) + " : Error converting " + string(str) + ", extra chars");
-			b = false;
-		}
-
-		if (errno)
-		{
-			m_ErrorReport.push_back(string(loc) + " : Error converting " + string(str));
-			b = false;
-		}
-
-		return b;
-	}
-
+	
 	/// <summary>
 	/// Convert an integer to a string.
 	/// Just a wrapper around _itoa_s() which wraps the result in a std::string.
@@ -523,10 +486,10 @@ private:
 
 				if (currentEmber.PaletteIndex() != -1)
 				{
-					if (!m_PaletteList.GetHueAdjustedPalette(PaletteList<T>::m_DefaultFilename, currentEmber.PaletteIndex(), currentEmber.m_Hue, currentEmber.m_Palette))
-					{
+					if (auto pal = m_PaletteList.GetPalette(PaletteList<T>::m_DefaultFilename, currentEmber.PaletteIndex()))
+						currentEmber.m_Palette = *pal;
+					else
 						m_ErrorReport.push_back(string(loc) + " : Error assigning palette with index " + Itos(currentEmber.PaletteIndex()));
-					}
 				}
 
 				//if (!Interpolater<T>::InterpMissingColors(currentEmber.m_Palette.m_Entries))
@@ -555,11 +518,11 @@ private:
 	{
 		bool ret = true;
 		bool fromEmber = false;
-		uint newLinear = 0;
+		size_t newLinear = 0;
 		char* attStr;
 		const char* loc = __FUNCTION__;
 		int soloXform = -1;
-		uint count, index = 0;
+		size_t i, count, index = 0;
 		double vals[16];
 		xmlAttrPtr att, curAtt;
 		xmlNodePtr editNode, childNode, motionNode;
@@ -578,38 +541,38 @@ private:
 			attStr = reinterpret_cast<char*>(xmlGetProp(emberNode, curAtt->name));
 
 			//First parse out simple float reads.
-			if		(ParseAndAssignFloat(curAtt->name, attStr, "time",                  currentEmber.m_Time,                ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "scale",					currentEmber.m_PixelsPerUnit,		ret)) { currentEmber.m_OrigPixPerUnit = currentEmber.m_PixelsPerUnit; }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "rotate",                currentEmber.m_Rotate,              ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "zoom",                  currentEmber.m_Zoom,                ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "filter",                currentEmber.m_SpatialFilterRadius, ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "temporal_filter_width", currentEmber.m_TemporalFilterWidth, ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "temporal_filter_exp",   currentEmber.m_TemporalFilterExp,   ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "quality",               currentEmber.m_Quality,             ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "brightness",            currentEmber.m_Brightness,          ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "gamma",                 currentEmber.m_Gamma,               ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "highlight_power",       currentEmber.m_HighlightPower,      ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "vibrancy",              currentEmber.m_Vibrancy,            ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "estimator_radius",      currentEmber.m_MaxRadDE,            ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "estimator_minimum",     currentEmber.m_MinRadDE,            ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "estimator_curve",       currentEmber.m_CurveDE,             ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "gamma_threshold",       currentEmber.m_GammaThresh,         ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "cam_zpos",				currentEmber.m_CamZPos,				ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "cam_persp",				currentEmber.m_CamPerspective,      ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "cam_perspective",		currentEmber.m_CamPerspective,      ret)) { }//Apo bug.
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "cam_yaw",				currentEmber.m_CamYaw,				ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "cam_pitch",				currentEmber.m_CamPitch,			ret)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "cam_dof",				currentEmber.m_CamDepthBlur,        ret)) { }
+			if		(ParseAndAssign(curAtt->name, attStr, "time",                  currentEmber.m_Time,                ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "scale",				   currentEmber.m_PixelsPerUnit,	   ret)) { currentEmber.m_OrigPixPerUnit = currentEmber.m_PixelsPerUnit; }
+			else if (ParseAndAssign(curAtt->name, attStr, "rotate",                currentEmber.m_Rotate,              ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "zoom",				   currentEmber.m_Zoom,				   ret)) { ClampGteRef<T>(currentEmber.m_Zoom, 0); }
+			else if (ParseAndAssign(curAtt->name, attStr, "filter",                currentEmber.m_SpatialFilterRadius, ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "temporal_filter_width", currentEmber.m_TemporalFilterWidth, ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "temporal_filter_exp",   currentEmber.m_TemporalFilterExp,   ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "quality",               currentEmber.m_Quality,             ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "brightness",            currentEmber.m_Brightness,          ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "gamma",                 currentEmber.m_Gamma,               ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "highlight_power",       currentEmber.m_HighlightPower,      ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "vibrancy",              currentEmber.m_Vibrancy,            ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "estimator_radius",      currentEmber.m_MaxRadDE,            ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "estimator_minimum",     currentEmber.m_MinRadDE,            ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "estimator_curve",       currentEmber.m_CurveDE,             ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "gamma_threshold",       currentEmber.m_GammaThresh,         ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "cam_zpos",			   currentEmber.m_CamZPos,			   ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "cam_persp",			   currentEmber.m_CamPerspective,      ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "cam_perspective",	   currentEmber.m_CamPerspective,      ret)) { }//Apo bug.
+			else if (ParseAndAssign(curAtt->name, attStr, "cam_yaw",			   currentEmber.m_CamYaw,			   ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "cam_pitch",			   currentEmber.m_CamPitch,			   ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "cam_dof",			   currentEmber.m_CamDepthBlur,        ret)) { }
 
 			//Parse simple int reads.
-			else if (ParseAndAssignInt(curAtt->name, attStr, "palette",          currentEmber.m_Palette.m_Index, ret)) { }
-			else if (ParseAndAssignInt(curAtt->name, attStr, "oversample",       currentEmber.m_Supersample    , ret)) { }
-			else if (ParseAndAssignInt(curAtt->name, attStr, "supersample",      currentEmber.m_Supersample    , ret)) { }
-			else if (ParseAndAssignInt(curAtt->name, attStr, "temporal_samples", currentEmber.m_TemporalSamples, ret)) { }
-			else if (ParseAndAssignInt(curAtt->name, attStr, "sub_batch_size",	 currentEmber.m_SubBatchSize   , ret)) { }
-			else if (ParseAndAssignInt(curAtt->name, attStr, "fuse",			 currentEmber.m_FuseCount	   , ret)) { }
-			else if (ParseAndAssignInt(curAtt->name, attStr, "soloxform",		 soloXform                     , ret)) { }
-			else if (ParseAndAssignInt(curAtt->name, attStr, "new_linear",		 newLinear					   , ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "palette",          currentEmber.m_Palette.m_Index, ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "oversample",       currentEmber.m_Supersample    , ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "supersample",      currentEmber.m_Supersample    , ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "temporal_samples", currentEmber.m_TemporalSamples, ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "sub_batch_size",	  currentEmber.m_SubBatchSize   , ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "fuse",			  currentEmber.m_FuseCount	    , ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "soloxform",		  soloXform                     , ret)) { }
+			else if (ParseAndAssign(curAtt->name, attStr, "new_linear",		  newLinear					    , ret)) { }
 
 			//Parse more complicated reads that have multiple possible values.
 			else if (!Compare(curAtt->name, "interpolation"))
@@ -633,13 +596,13 @@ private:
 			else if (!Compare(curAtt->name, "interpolation_space") || !Compare(curAtt->name, "interpolation_type"))
 			{
 				if (!_stricmp("linear", attStr))
-					currentEmber.m_AffineInterp = INTERP_LINEAR;
+					currentEmber.m_AffineInterp = AFFINE_INTERP_LINEAR;
 				else if (!_stricmp("log", attStr))
-					currentEmber.m_AffineInterp = INTERP_LOG;
+					currentEmber.m_AffineInterp = AFFINE_INTERP_LOG;
 				else if (!_stricmp("old", attStr))
-					currentEmber.m_AffineInterp = INTERP_COMPAT;
+					currentEmber.m_AffineInterp = AFFINE_INTERP_COMPAT;
 				else if (!_stricmp("older", attStr))
-					currentEmber.m_AffineInterp = INTERP_OLDER;
+					currentEmber.m_AffineInterp = AFFINE_INTERP_OLDER;
 				else
 					m_ErrorReport.push_back(string(loc) + " : Unrecognized interpolation type " + string(attStr));
 			}
@@ -650,7 +613,7 @@ private:
 			}
 			else if (!Compare(curAtt->name, "version"))
 			{
-				if (ToLower(string(attStr)).find_first_of("ember") != string::npos)
+				if (ToLower(string(attStr)).find("ember") != string::npos)
 					fromEmber = true;
 			}
 			else if (!Compare(curAtt->name, "size"))
@@ -713,18 +676,13 @@ private:
 				currentEmber.m_Background[1] = T(vals[1]);
 				currentEmber.m_Background[2] = T(vals[2]);
 			}
-			else if (!Compare(curAtt->name, "hue"))
-			{
-				Atof(attStr, currentEmber.m_Hue);
-				currentEmber.m_Hue = fmod(currentEmber.m_Hue, T(0.5));//Orig did fmod 1, but want it in the range -0.5 - 0.5.
-			}
 			else if (!Compare(curAtt->name, "curves"))
 			{
 				stringstream ss(attStr);
 
 				for (int i = 0; i < 4; i++)
 				{
-					for (int j = 0; j < 4; j++)
+					for (glm::length_t j = 0; j < 4; j++)
 					{
 						ss >> currentEmber.m_Curves.m_Points[i][j].x;
 						ss >> currentEmber.m_Curves.m_Points[i][j].y;
@@ -765,7 +723,7 @@ private:
 
 					if (!Compare(curAtt->name, "index"))
 					{
-						Atoi(attStr, index);
+						Aton(attStr, index);
 					}
 					else if(!Compare(curAtt->name, "rgb"))
 					{
@@ -825,7 +783,7 @@ private:
 
 					if (!Compare(curAtt->name, "count"))
 					{
-						Atoi(attStr, count);
+						Aton(attStr, count);
 					}
 					else if (!Compare(curAtt->name, "data"))
 					{
@@ -864,7 +822,7 @@ private:
 
 					if (!Compare(curAtt->name, "count"))
 					{
-						Atoi(attStr, numColors);
+						Aton(attStr, numColors);
 					}
 					else if (!Compare(curAtt->name, "format"))
 					{
@@ -916,7 +874,7 @@ private:
 
 					if (!Compare(curAtt->name, "kind"))
 					{
-						Atoi(attStr, symKind);
+						Aton(attStr, symKind);
 					}
 					else
 					{
@@ -1017,8 +975,8 @@ private:
 				{
 					attStr = reinterpret_cast<char*>(xmlGetProp(childNode, curAtt->name));
 
-					if		(ParseAndAssignFloat(curAtt->name, attStr, "motion_frequency", motion.m_MotionFreq, ret)) { }
-					else if	(ParseAndAssignFloat(curAtt->name, attStr, "motion_offset", motion.m_MotionOffset, ret)) { }
+					if		(ParseAndAssign(curAtt->name, attStr, "motion_frequency", motion.m_MotionFreq,   ret)) { }
+					else if	(ParseAndAssign(curAtt->name, attStr, "motion_offset",	  motion.m_MotionOffset, ret)) { }
 					else if (!Compare(curAtt->name, "motion_function"))
 					{
 						string func(attStr);
@@ -1051,8 +1009,6 @@ private:
 						ret = ret && AttToEmberMotionFloat(att, attStr, FLAME_MOTION_DEPTH_BLUR, motion);
 					else if (!Compare(curAtt->name, "rotate"))
 						ret = ret && AttToEmberMotionFloat(att, attStr, FLAME_MOTION_ROTATE, motion);
-					else if (!Compare(curAtt->name, "hue"))
-						ret = ret && AttToEmberMotionFloat(att, attStr, FLAME_MOTION_HUE, motion);
 					else if (!Compare(curAtt->name, "brightness"))
 						ret = ret && AttToEmberMotionFloat(att, attStr, FLAME_MOTION_BRIGHTNESS, motion);
 					else if (!Compare(curAtt->name, "gamma"))
@@ -1114,8 +1070,8 @@ private:
 			}
 		}
 
-		//if (!newLinear)
-		//	currentEmber.Flatten(m_FlattenNames);
+		if (!fromEmber && !newLinear)
+			currentEmber.Flatten(m_FlattenNames);
 
 		for (int i = 0; i < (int)currentEmber.XformCount(); i++)
 			if (soloXform >= 0 && i != soloXform)
@@ -1138,7 +1094,7 @@ private:
 		bool r = false;
 		T val = 0.0;
 
-		if (Atof(attStr, val))
+		if (Aton(attStr, val))
 		{
 			motion.m_MotionParams.push_back(MotionParam<T>(param, val));
 			r = true;
@@ -1163,7 +1119,7 @@ private:
 		bool success = true;
 		char* attStr;
 		const char* loc = __FUNCTION__;
-		uint j;
+		size_t j;
 		T temp;
 		double a, b, c, d, e, f;
 		double vals[10];
@@ -1183,13 +1139,13 @@ private:
 			attStr = reinterpret_cast<char*>(xmlGetProp(childNode, curAtt->name));
 
 			//First parse out simple float reads.
-			if (ParseAndAssignFloat(curAtt->name, attStr, "weight", xform.m_Weight, success)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "color_speed", xform.m_ColorSpeed, success)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "animate", xform.m_Animate, success)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "opacity", xform.m_Opacity, success)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "var_color", xform.m_DirectColor, success)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "motion_frequency", xform.m_MotionFreq, success)) { }
-			else if (ParseAndAssignFloat(curAtt->name, attStr, "motion_offset", xform.m_MotionOffset, success)) { }
+			if		(ParseAndAssign(curAtt->name, attStr, "weight",			  xform.m_Weight, success))		  { }
+			else if (ParseAndAssign(curAtt->name, attStr, "color_speed",	  xform.m_ColorSpeed, success))   { }
+			else if (ParseAndAssign(curAtt->name, attStr, "animate",		  xform.m_Animate, success))      { }
+			else if (ParseAndAssign(curAtt->name, attStr, "opacity",		  xform.m_Opacity, success))      { }
+			else if (ParseAndAssign(curAtt->name, attStr, "var_color",		  xform.m_DirectColor, success))  { }
+			else if (ParseAndAssign(curAtt->name, attStr, "motion_frequency", xform.m_MotionFreq, success))   { }
+			else if (ParseAndAssign(curAtt->name, attStr, "motion_offset",	  xform.m_MotionOffset, success)) { }
 
 			//Parse more complicated reads that have multiple possible values.
 			else if (!Compare(curAtt->name, "name"))
@@ -1201,7 +1157,7 @@ private:
 			{
 				//Deprecated, set both color_speed and animate to this value.
 				//Huh? Either set it or not?
-				Atof(attStr, temp);
+				Aton(attStr, temp);
 				xform.m_ColorSpeed = (1 - temp) / 2;
 				xform.m_Animate = T(temp > 0 ? 0 : 1);
 			}
@@ -1300,7 +1256,7 @@ private:
 				{
 					auto varCopy = var->Copy();
 
-					Atof(attStr, varCopy->m_Weight);
+					Aton(attStr, varCopy->m_Weight);
 					xform.AddVariation(varCopy);
 				}
 				//else
@@ -1324,7 +1280,7 @@ private:
 				for (j = 0; j < xform.TotalVariationCount(); j++)
 					xform.GetVariation(j)->m_Weight = 0;
 
-				if (Atof(attStr, temp))
+				if (Aton(attStr, temp))
 				{
 					uint iTemp = static_cast<uint>(temp);
 
@@ -1352,7 +1308,7 @@ private:
 			{
 				attStr = reinterpret_cast<char*>(xmlGetProp(childNode, curAtt->name));
 
-				if (Atof(attStr, temp))
+				if (Aton(attStr, temp))
 				{
 					for (j = 0; j < xform.TotalVariationCount(); j++)
 						xform.GetVariation(j)->m_Weight = temp;
@@ -1369,7 +1325,7 @@ private:
 		}
 
 		//Now that all xforms have been parsed, go through and try to find params for the parametric variations.
-		for (uint i = 0; i < xform.TotalVariationCount(); i++)
+		for (size_t i = 0; i < xform.TotalVariationCount(); i++)
 		{
 			if (ParametricVariation<T>* parVar = dynamic_cast<ParametricVariation<T>*>(xform.GetVariation(i)))
 			{
@@ -1384,7 +1340,7 @@ private:
 						T val = 0;
 						attStr = CX(xmlGetProp(childNode, curAtt->name));
 
-						if (Atof(attStr, val))
+						if (Aton(attStr, val))
 						{
 							parVar->SetParamVal(name, val);
 						}
@@ -1406,16 +1362,17 @@ private:
 	/// Some Apophysis plugins use an inconsistent naming scheme for the parametric variation variables.
 	/// This function identifies and converts them to Ember's consistent naming convention.
 	/// </summary>
-	/// <param name="vec">The vector of corrected names to search</param>
-	/// <param name="att">The current Xml node to check</param>
+	/// <param name="names">The map of corrected names to search</param>
+	/// <param name="name">The current Xml node to check</param>
 	/// <returns>The corrected name if one was found, else the passed in name.</returns>
-	static string GetCorrectedParamName(vector<pair<string, string>>& vec, const char* name)
+	static string GetCorrectedParamName(const unordered_map<string, string>& names, const char* name)
 	{
-		for (auto& v : vec)
-			if (!_stricmp(v.first.c_str(), name))
-				return v.second;
+		const auto& newName = names.find(ToLower(name));
 
-		return name;
+		if (newName != names.end())
+			return newName->second;
+		else
+			return name;
 	}
 
 	/// <summary>
@@ -1479,13 +1436,13 @@ private:
 	/// <param name="numColors">The number of colors present</param>
 	/// <param name="chan">The number of channels in each color</param>
 	/// <returns>True if there were no errors, else false.</returns>
-	bool ParseHexColors(char* colstr, Ember<T>& ember, int numColors, int chan)
+	bool ParseHexColors(char* colstr, Ember<T>& ember, size_t numColors, intmax_t chan)
 	{
-		int colorIndex = 0;
-		int colorCount = 0;
+		size_t colorIndex = 0;
+		size_t colorCount = 0;
 		uint r, g, b, a;
 		int ret;
-		int skip = static_cast<int>(abs(chan));
+		size_t skip = std::abs(chan);
 		bool ok = true;
 		const char* loc = __FUNCTION__;
 
@@ -1542,54 +1499,32 @@ private:
 	}
 
 	/// <summary>
-	/// Wrapper to parse a floating point Xml value and convert it to float.
+	/// Wrapper to parse a numeric Xml string value and convert it.
 	/// </summary>
 	/// <param name="name">The xml tag to parse</param>
 	/// <param name="attStr">The name of the Xml attribute</param>
 	/// <param name="str">The name of the Xml tag</param>
 	/// <param name="val">The parsed value</param>
-	/// <param name="b">Bitwise ANDed with true if name matched str and the call to Atof() succeeded, else false. Used for keeping a running value between successive calls.</param>
-	/// <returns>True if the tag was matched, else false</returns>
-	bool ParseAndAssignFloat(const xmlChar* name, const char* attStr, const char* str, T& val, bool& b)
+	/// <param name="b">Bitwise ANDed with true if name matched str and the conversion succeeded, else false. Used for keeping a running value between successive calls.</param>
+	/// <returns>True if the tag was matched and the conversion succeeded, else false</returns>
+	template <typename valT>
+	bool ParseAndAssign(const xmlChar* name, const char* attStr, const char* str, valT& val, bool& b)
 	{
 		bool ret = false;
 
 		if (!Compare(name, str))
 		{
-			b &= Atof(attStr, val);
-			ret = true;//Means the strcmp() was right, but doesn't necessarily mean the conversion went ok.
-		}
+			istringstream istr(attStr);
 
-		return ret;
-	}
-
-	/// <summary>
-	/// Wrapper to parse an int Xml string value and convert it to an int.
-	/// </summary>
-	/// <param name="name">The xml tag to parse</param>
-	/// <param name="attStr">The name of the Xml attribute</param>
-	/// <param name="str">The name of the Xml tag</param>
-	/// <param name="val">The parsed value</param>
-	/// <param name="b">Bitwise ANDed with true if name matched str and the call to Atoi() succeeded, else false. Used for keeping a running value between successive calls.</param>
-	/// <returns>True if the tag was matched, else false</returns>
-	template <typename intT>
-	bool ParseAndAssignInt(const xmlChar* name, const char* attStr, const char* str, intT& val, bool& b)
-	{
-		bool ret = false;
-		T fval = 0;
-
-		if (!Compare(name, str))
-		{
-			b &= Atof(attStr, fval);
-			val = static_cast<intT>(fval);
-			ret = true;//Means the strcmp() was right, but doesn't necessarily mean the conversion went ok.
+			istr >> val;
+			ret = !istr.bad() && !istr.fail();//Means the Compare() was right, and the conversion succeeded.
 		}
 
 		return ret;
 	}
 
 	static bool m_Init;
-	static vector<pair<string, string>> m_BadParamNames;
+	static unordered_map<string, string> m_BadParamNames;
 	static vector<pair<pair<string, string>, vector<string>>> m_BadVariationNames;
 	VariationList<T> m_VariationList;//The variation list used to make copies of variations to populate the embers with.
 	PaletteList<T> m_PaletteList;

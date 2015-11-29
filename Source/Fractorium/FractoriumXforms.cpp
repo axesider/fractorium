@@ -31,7 +31,6 @@ void Fractorium::InitXformsUI()
 	connect(ui.XformWeightNameTable, SIGNAL(cellChanged(int, int)), this, SLOT(OnXformNameChanged(int, int)), Qt::QueuedConnection);
 
 	ui.CurrentXformCombo->setProperty("soloxform", -1);
-
 #ifndef WIN32    
 	//For some reason linux makes these 24x24, even though the designer explicitly says 16x16.
 	ui.AddXformButton->setIconSize(QSize(16, 16));
@@ -88,7 +87,7 @@ void FractoriumEmberController<T>::CurrentXformComboChanged(int index)
 		m_Fractorium->m_XformWeightSpin->setEnabled(enable);
 		m_Fractorium->ui.SoloXformCheckBox->setEnabled(enable);
 		m_Fractorium->ui.AddLinkedXformButton->setEnabled(enable);
-		m_Fractorium->ui.AddFinalXformButton->setEnabled(enable);
+		m_Fractorium->ui.AddFinalXformButton->setEnabled(!m_Ember.UseFinalXform());
 	}
 }
 
